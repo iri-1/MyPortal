@@ -1,0 +1,1930 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Portal — 思い出・記録・繋がり</title>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- MENU TRIGGER -->
+    <div id="menu-circle-trigger" onclick="toggleMenu()">メニュー</div>
+
+    <!-- HEADER -->
+    <header>
+        <div class="logo">My<span>Portal</span></div>
+        <nav>
+            <button id="nav-pin-btn" onclick="toggleNavFixed()" style="margin-bottom:12px; background:var(--bg); border:1.5px dashed var(--border); font-size:0.8rem; justify-content:center; opacity:0.7;">📌 固定する</button>
+            <button class="active" data-page="home">🏠 ホーム</button>
+            <button data-page="album">📷 アルバム</button>
+            <button data-page="calendar">📅 カレンダー</button>
+            <button data-page="memo">📝 メモ</button>
+            <button data-page="bookmarks">🔖 ブックマーク</button>
+            <button data-page="diary">📔 日記</button>
+            <button data-page="game">🎮 ゲーム</button>
+            <button id="nav-settings-btn" class="admin-only" data-page="settings">⚙️
+                設定</button>
+            <button id="nav-admin-btn" class="super-admin-only" data-page="admin" style="color:var(--accent);">👑
+                管理</button>
+            <button id="nav-login-btn" onclick="toggleLoginState()"
+                class="btn-primary">🔑 ログイン</button>
+            <a href="register.html" id="nav-register-btn" class="btn btn-primary"
+                style="text-decoration:none;">✨
+                新規登録</a>
+        </nav>
+    </header>
+
+    <!-- HOME -->
+    <div id="page-home" class="page active">
+        <div class="section-header" id="home-section-header">
+            <h2>マイページ</h2><span class="en">My Personal Portal</span>
+        </div>
+        <div style="max-width:1100px;margin:0 auto;padding:0 40px">
+            <div class="hero-greeting">
+                <div class="date-badge" id="home-date-badge">loading...</div>
+                <div style="display:flex; align-items:center; gap:20px; margin-top: 12px;">
+                    <div id="home-profile-img"
+                        style="width:128px;height:128px;border-radius:50%;background:#e4e0d8;display:flex;align-items:center;justify-content:center;font-size:4rem;overflow:hidden;flex-shrink:0;">
+                        👤</div>
+                    <div>
+                        <h1 style="margin-bottom:6px; font-size:1.8rem;"><span id="home-name-wrap"><span
+                                id="home-profile-name"></span>さん、</span>おかえり！<br>今日もいい一日を。</h1>
+                        <div id="home-birthday-msg"
+                            style="display:none; color:#c97b7b; font-weight:600; font-size:.95rem;">🎂
+                            今日はお誕生日！おめでとうございます🎉</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="news-section">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+                    <h3 style="margin-bottom:0;">📢 お知らせ</h3>
+                    <button class="btn btn-primary admin-only" style="padding:6px 12px; font-size:.75rem;"
+                        onclick="openNewsModal()">＋ お知らせを投稿</button>
+                </div>
+                <ul class="news-list" id="home-news-list">
+                    <!-- Dynamic rendering -->
+                </ul>
+            </div>
+
+            <div class="home-grid">
+                <div class="home-card" style="--card-color:#c8a96e" onclick="showPage('album')">
+                    <span class="card-icon">📷</span>
+                    <h3>フォトアルバム</h3>
+                    <p>大切な写真や思い出の瞬間を保存しよう</p>
+                    <div class="card-meta" id="home-album-count">0 枚</div>
+                </div>
+                <div class="home-card" style="--card-color:#7c9e8a" onclick="showPage('calendar')">
+                    <span class="card-icon">📅</span>
+                    <h3>カレンダー</h3>
+                    <p>予定やイベントを管理しよう</p>
+                    <div class="card-meta" id="home-event-count">0 件</div>
+                </div>
+                <div class="home-card" style="--card-color:#8aaecc" onclick="showPage('memo')">
+                    <span class="card-icon">📝</span>
+                    <h3>メモ帳</h3>
+                    <p>アイデアや大切なことを書き留めよう</p>
+                    <div class="card-meta" id="home-memo-count">0 件</div>
+                </div>
+                <div class="home-card" style="--card-color:#b08ec8" onclick="showPage('bookmarks')">
+                    <span class="card-icon">🔖</span>
+                    <h3>ブックマーク</h3>
+                    <p>よく使うサイトを素早くアクセスしよう</p>
+                    <div class="card-meta" id="home-bm-count">0 件</div>
+                </div>
+                <div class="home-card" style="--card-color:#c97b7b" onclick="showPage('diary')">
+                    <span class="card-icon">📔</span>
+                    <h3>日記</h3>
+                    <p>毎日の出来事や気持ちを記録しよう</p>
+                    <div class="card-meta" id="home-diary-count">0 件</div>
+                </div>
+                <div class="home-card" style="--card-color:#6aaccc" onclick="showPage('game')">
+                    <span class="card-icon">🎮</span>
+                    <h3>ミニゲーム</h3>
+                    <p>暇つぶしに楽しめる6種類のゲーム</p>
+                    <div class="card-meta">6 ゲーム</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ALBUM -->
+    <div id="page-album" class="page">
+        <div class="section-header">
+            <h2>フォトアルバム</h2><span class="en">Photo Album</span>
+        </div>
+        <div class="album-toolbar">
+            <button class="btn btn-primary admin-only" onclick="document.getElementById('photo-input').click()">＋
+                写真を追加</button>
+            <input type="file" id="photo-input" accept="image/*" multiple style="display:none"
+                onchange="addPhotos(event)">
+            <span style="font-size:.82rem;color:var(--ink-muted)">写真をクリックして拡大表示 <span
+                    class="admin-only">右クリックで削除</span></span>
+        </div>
+        <div class="album-grid" id="album-grid">
+            <div class="album-empty">
+                <div class="big-icon">🖼️</div>
+                <p>まだ写真がありません。<br>「写真を追加」ボタンから追加できます。</p>
+            </div>
+        </div>
+    </div>
+    <div class="lightbox" id="lightbox" onclick="closeLightbox(event)">
+        <button class="lightbox-close" onclick="closeLightbox(event, true)">✕</button>
+        <img id="lightbox-img" src="" alt="" onclick="event.stopPropagation()">
+        <div class="lightbox-caption" id="lightbox-caption" onclick="event.stopPropagation()"></div>
+        <div id="lightbox-comment-area" style="margin-top:16px; width:100%; max-width:600px; text-align:center;" onclick="event.stopPropagation()">
+            <div id="lightbox-comment-text" style="color:#fff; font-size:1rem; margin-bottom:12px; white-space:pre-wrap; word-wrap:break-word;"></div>
+            <button class="btn btn-ghost admin-only" style="color:#fff; border-color:#fff;" onclick="editPhotoComment(event)">💬 コメントを追加/編集</button>
+        </div>
+    </div>
+
+    <!-- CALENDAR -->
+    <div id="page-calendar" class="page">
+        <div class="section-header">
+            <h2>カレンダー</h2><span class="en">Schedule</span>
+        </div>
+        <div style="max-width:900px;margin:0 auto;padding:0 40px">
+            <div class="cal-header">
+                <button class="cal-nav-btn" onclick="changeMonth(-1)">◀ 前</button>
+                <h3 id="cal-title">2024年1月</h3>
+                <button class="cal-nav-btn" onclick="changeMonth(1)">次 ▶</button>
+                <button class="btn btn-primary admin-only" style="margin-left:auto" onclick="openEventModal()">＋
+                    予定を追加</button>
+            </div>
+            <div class="cal-grid">
+                <div class="cal-weekdays">
+                    <div>日</div>
+                    <div>月</div>
+                    <div>火</div>
+                    <div>水</div>
+                    <div>木</div>
+                    <div>金</div>
+                    <div>土</div>
+                </div>
+                <div class="cal-days" id="cal-days"></div>
+            </div>
+            <div class="event-list" id="event-list"></div>
+        </div>
+    </div>
+    <div class="modal-overlay" id="event-modal">
+        <div class="modal">
+            <h4>📅 予定を追加</h4>
+            <div class="field" style="display:flex; gap:12px;">
+                <div style="flex:1;"><label>日付</label><input type="date" id="ev-date"></div>
+                <div style="flex:1;"><label>時間 (任意)</label><input type="time" id="ev-time"></div>
+            </div>
+            <div class="field"><label>タイトル</label><input type="text" id="ev-title" placeholder="予定のタイトル"></div>
+            <div class="field"><label>メモ</label><textarea id="ev-memo" placeholder="詳細・場所・備考など"></textarea></div>
+            <div class="field"><label>カラー</label>
+                <select id="ev-color">
+                    <option value="#7c9e8a">グリーン</option>
+                    <option value="#c8a96e">イエロー</option>
+                    <option value="#c97b7b">レッド</option>
+                    <option value="#8aaecc">ブルー</option>
+                    <option value="#b08ec8">パープル</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeEventModal()">キャンセル</button>
+                <button class="btn btn-primary" onclick="addEvent()">追加する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MEMO -->
+    <div id="page-memo" class="page">
+        <div class="section-header">
+            <h2>メモ帳</h2><span class="en">Notes</span>
+        </div>
+        <div style="max-width:1100px;margin:0 auto;padding:0 40px">
+            <div class="memo-layout">
+                <div>
+                    <button class="btn btn-primary admin-only" style="width:100%; margin-bottom:12px;" onclick="newMemo()">保存</button>
+                    <div id="memo-list"></div>
+                </div>
+                <div class="memo-editor">
+                    <input class="memo-title-input" id="memo-title" placeholder="タイトルを入力" oninput="saveMemo()"
+                        style="pointer-events:var(--pointer-events, auto);">
+                    <textarea class="memo-body-input" id="memo-body" placeholder="メモを入力してください" oninput="saveMemo()"
+                        style="pointer-events:var(--pointer-events, auto);"></textarea>
+                    <div class="memo-toolbar admin-only">
+                        <span class="ms" id="memo-save-status">空</span>
+                        <button class="btn btn-danger" onclick="deleteMemo()">削除</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- BOOKMARKS -->
+    <div id="page-bookmarks" class="page">
+        <div class="section-header">
+            <h2>ブックマーク</h2><span class="en">Bookmarks</span>
+        </div>
+        <div style="max-width:1100px;margin:0 auto;padding:0 40px">
+            <div class="bm-add-form admin-only">
+                <div class="field"><label>サイト名</label><input type="text" id="bm-name" placeholder="サイト名"></div>
+                <div class="field"><label>URL</label><input type="url" id="bm-url" placeholder="https://..."></div>
+                <div class="field"><label>説明</label><input type="text" id="bm-desc" placeholder="簡単な説明（任意）"></div>
+                <div class="field"><label>タグ</label><input type="text" id="bm-tag" placeholder="カテゴリなど（任意）"></div>
+                <button class="btn btn-primary" style="align-self:flex-end;margin-bottom:0"
+                    onclick="addBookmark()">追加</button>
+            </div>
+            <div class="bm-grid" id="bm-grid"></div>
+        </div>
+    </div>
+
+    <!-- DIARY -->
+    <div id="page-diary" class="page">
+        <div class="section-header">
+            <h2>日記</h2><span class="en">Diary</span>
+        </div>
+        <div style="max-width:800px;margin:0 auto;padding:0 40px">
+            <div class="diary-toolbar admin-only">
+                <button class="btn btn-primary" onclick="toggleDiaryForm()">＋ 今日の日記を書く</button>
+            </div>
+            <div class="diary-new-form" id="diary-form" style="display:none">
+                <div class="field" style="margin-bottom:16px;">
+                    <label style="display:flex; align-items:center; gap:8px; font-family:'Shippori Mincho', serif; font-size:1.1rem; color:var(--ink); text-transform:none;">
+                        📔 <input type="date" id="diary-form-date-input" style="border:none; border-bottom:1.5px solid var(--accent); border-radius:0; padding:4px; font-weight:700; font-size:1.1rem; font-family:'Outfit', sans-serif; background:transparent; width:auto; color:var(--ink);">
+                    </label>
+                </div>
+                <div class="field"><label>タイトル</label><input type="text" id="diary-title" placeholder="今日のひとこと...">
+                </div>
+                <div
+                    style="font-size:.8rem;font-weight:600;color:var(--ink-muted);margin-bottom:8px;letter-spacing:.05em;text-transform:uppercase">
+                    今の気分</div>
+                <div class="mood-picker" id="mood-picker">
+                    <button class="mood-btn" data-mood="😀" onclick="selectMood(this)">😀</button>
+                    <button class="mood-btn" data-mood="😊" onclick="selectMood(this)">😊</button>
+                    <button class="mood-btn" data-mood="😐" onclick="selectMood(this)">😐</button>
+                    <button class="mood-btn" data-mood="😔" onclick="selectMood(this)">😔</button>
+                    <button class="mood-btn" data-mood="😢" onclick="selectMood(this)">😢</button>
+                    <button class="mood-btn" data-mood="😡" onclick="selectMood(this)">😡</button>
+                    <button class="mood-btn" data-mood="😴" onclick="selectMood(this)">😴</button>
+                    <button class="mood-btn" data-mood="🤩" onclick="selectMood(this)">🤩</button>
+                </div>
+                <div class="field"><label>日記</label><textarea id="diary-body" placeholder="今日のことを自由に書いてください"
+                        style="min-height:160px"></textarea></div>
+                <div class="modal-actions">
+                    <button class="btn btn-ghost" onclick="toggleDiaryForm()">キャンセル</button>
+                    <button class="btn btn-primary" onclick="saveDiary()">保存する</button>
+                </div>
+            </div>
+            <div id="diary-entries"></div>
+        </div>
+    </div>
+
+    <!-- GAME -->
+    <div id="page-game" class="page">
+        <div class="section-header">
+            <h2>ミニゲーム</h2><span class="en">Mini Games</span>
+        </div>
+        <div style="max-width:900px;margin:0 auto;padding:0 40px">
+            <div class="game-tabs" style="flex-wrap: wrap;">
+                <button class="game-tab active" onclick="switchGame('mine',this)">💣 マインスイーパー</button>
+                <button class="game-tab" onclick="switchGame('memory',this)">🃏 記憶ゲーム</button>
+                <button class="game-tab" onclick="switchGame('word',this)">🔤 単語当て</button>
+                <button class="game-tab" onclick="switchGame('janken',this)">✊ じゃんけん</button>
+                <button class="game-tab" onclick="switchGame('roulette',this)">🎡 ルーレット</button>
+                <button class="game-tab" onclick="switchGame('omikuji',this)">🎋 おみくじ</button>
+            </div>
+
+            <!-- MINESWEEPER -->
+            <div id="game-mine" class="game-panel active">
+                <div class="mine-header">
+                    <span class="mine-info">💣 残り: <span id="mine-count">10</span></span>
+                    <span class="mine-info">時間 <span id="mine-timer">0</span>秒</span>
+                    <button class="btn btn-ghost" onclick="initMine()">🔄 リセット</button>
+                    <select id="mine-level" onchange="initMine()"
+                        style="padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;font-family:Outfit,sans-serif;background:var(--bg)">
+                        <option value="easy">初級 (8×8 / 10)</option>
+                        <option value="medium">中級 (12×12 / 20)</option>
+                    </select>
+                    <span id="mine-status" style="font-weight:600;color:var(--accent)"></span>
+                </div>
+                <div id="mine-board"></div>
+                <p style="margin-top:12px;font-size:.8rem;color:var(--ink-muted)">左クリック: マスを開く ／ 右クリック: 旗を立てる</p>
+            </div>
+
+            <!-- MEMORY GAME -->
+            <div id="game-memory" class="game-panel">
+                <div class="mem-header">
+                    <span class="mine-info">🃏 めくった回数: <span id="mem-flips">0</span></span>
+                    <span class="mine-info">✅ マッチ数: <span id="mem-matches">0</span>/8</span>
+                    <button class="btn btn-ghost" onclick="initMemory()">🔄 リセット</button>
+                </div>
+                <div id="mem-board"></div>
+            </div>
+
+            <!-- WORD GAME -->
+            <div id="game-word" class="game-panel">
+                <div id="word-game">
+                    <div class="hangman-area">
+                        <div class="hangman-lives" id="hangman-lives"></div>
+                        <div style="font-size:.85rem;color:var(--ink-muted);margin-bottom:4px" id="word-hint"></div>
+                    </div>
+                    <div class="word-display" id="word-display"></div>
+                    <div class="wrong-letters" id="wrong-letters"></div>
+                    <div class="keyboard-grid" id="keyboard"></div>
+                    <div id="word-result"
+                        style="text-align:center;font-size:1.1rem;font-weight:700;margin-top:16px;min-height:28px">
+                    </div>
+                    <div style="text-align:center;margin-top:12px">
+                        <button class="btn btn-ghost" onclick="initWord()">🔄 次の問題</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- JANKEN -->
+            <div id="game-janken" class="game-panel">
+                <div style="text-align:center;">
+                    <p id="janken-status" style="font-size:1.2rem;font-weight:700;margin-bottom:8px;min-height:28px;">
+                        手を選んで勝負！✊✌️✋</p>
+                    <div class="janken-arena">
+                        <div id="jk-cpu" class="hand-cpu">✊</div>
+                        <div style="font-size:1.5rem;color:var(--border);font-weight:700;">VS</div>
+                        <div id="jk-player">✊</div>
+                    </div>
+                    <div class="janken-hands" id="janken-btns">
+                        <button class="janken-btn" onclick="playJanken('rock')">✊</button>
+                        <button class="janken-btn" onclick="playJanken('scissors')">✌️</button>
+                        <button class="janken-btn" onclick="playJanken('paper')">✋</button>
+                    </div>
+                    <div class="janken-result-area" id="janken-result"></div>
+                </div>
+            </div>
+
+            <!-- ROULETTE -->
+            <div id="game-roulette" class="game-panel">
+                <div style="text-align:center;">
+                    <div class="roulette-container">
+                        <div class="roulette-pointer"></div>
+                        <canvas id="roulette-canvas" class="roulette-canvas" width="400" height="400"></canvas>
+                    </div>
+                    <div style="margin-top:24px; display:flex; gap:8px; justify-content:center;">
+                        <input type="text" id="roulette-items" value="ランチ, 夕食, おやつ, 飲み物" oninput="drawRoulette()"
+                            style="padding:10px;width:300px;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;"
+                            placeholder="項目をカンマ区切りで入力">
+                        <button class="btn btn-ghost" onclick="saveRoulettePreset()">保存</button>
+                    </div>
+                    <div id="roulette-presets"
+                        style="margin-top:12px; display:flex; gap:8px; flex-wrap:wrap; justify-content:center; max-width:440px; margin-left:auto; margin-right:auto;">
+                    </div>
+                    <button id="roulette-btn" class="btn btn-primary" style="margin-top:16px;"
+                        onclick="spinRoulette()">🎡 回す！</button>
+                </div>
+            </div>
+
+            <!-- OMIKUJI -->
+            <div id="game-omikuji" class="game-panel">
+                <div style="text-align:center;">
+                    <p id="omikuji-inst" style="color:var(--ink-muted);margin-bottom:12px;">箱をクリックしておみくじを引いてみよう</p>
+                    <div class="omikuji-box" id="omikuji-box" onclick="shakeOmikujiBox()">🎋おみくじ🎋</div>
+                    <div id="omikuji-slips"
+                        style="display:none; gap:12px; justify-content:center; flex-wrap:wrap; margin-top:24px; max-width: 500px; margin-left: auto; margin-right: auto;">
+                    </div>
+                    <div id="omikuji-result" style="display:none; margin-top:24px;"></div>
+                    <button id="omikuji-reset" class="btn btn-ghost" style="display:none; margin: 24px auto 0;"
+                        onclick="resetOmikuji()">🔄 もう一度引く</button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- ADMIN PAGE -->
+    <div id="page-admin" class="page">
+        <div class="section-header">
+            <h2>👑 サイト管理室</h2><span class="en">Admin Control Panel</span>
+        </div>
+        <div style="max-width:800px; margin:0 auto; padding:0 40px; display:flex; flex-direction:column; gap:32px;">
+            
+            <div style="background:var(--surface); border-radius:16px; padding:32px; box-shadow:var(--shadow-lg);">
+                <h3 style="margin-bottom:20px; font-family:'Shippori Mincho', serif; border-bottom:1.5px solid var(--border); padding-bottom:12px;">管理者プロフィール設定</h3>
+                
+                <div style="text-align:center; margin-bottom:24px;">
+                    <div id="admin-img-preview"
+                        style="width:120px;height:120px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;overflow:hidden;font-size:4rem;border:2px solid var(--border);cursor:pointer;"
+                        onclick="document.getElementById('admin-img-file').click()">👤</div>
+                    <button class="btn btn-ghost" onclick="document.getElementById('admin-img-file').click()">画像を変更</button>
+                    <input type="file" id="admin-img-file" accept="image/*" style="display:none;" onchange="handleProfileImage(this, 'admin-img-preview', 'admin-img-data')">
+                    <input type="hidden" id="admin-img-data">
+                </div>
+                <div class="field">
+                    <label>管理者名（表示名）</label>
+                    <input type="text" id="admin-name" placeholder="運営管理者">
+                </div>
+                <div class="field">
+                    <label>管理者ログインID</label>
+                    <input type="text" id="admin-id" placeholder="admin" disabled style="background:#efefef; color:var(--ink-muted); cursor:not-allowed;">
+                </div>
+                <div class="field">
+                    <label>管理者パスワード</label>
+                    <div style="display:flex; gap:8px;">
+                        <input type="password" id="admin-pass" style="flex:1;" placeholder="パスワードを入力">
+                        <button class="btn btn-ghost" onclick="toggleAdminPassView()" style="width:50px;font-size:1.2rem;padding:0;display:flex;align-items:center;justify-content:center;">👁</button>
+                    </div>
+                </div>
+                
+                <div style="margin-top:24px; text-align:center;">
+                    <button class="btn btn-primary" style="width:100%; border-radius:100px; padding:12px;" onclick="saveAdminSettings()">設定を保存する</button>
+                </div>
+            </div>
+
+            <div style="background:var(--surface); border-radius:16px; padding:32px; box-shadow:var(--shadow-lg);">
+                <h3 style="margin-bottom:20px; font-family:'Shippori Mincho', serif; border-bottom:1.5px solid var(--border); padding-bottom:12px;">👥 登録ユーザー管理</h3>
+                <p style="font-size:0.85rem; color:var(--ink-muted); margin-bottom:16px;">現在登録されているすべてのユーザー一覧です。</p>
+                <div id="admin-users-list" style="display:flex; flex-direction:column; gap:12px;"></div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- SETTINGS PAGE -->
+    <div id="page-settings" class="page">
+        <div class="section-header">
+            <h2>設定</h2><span class="en">Settings</span>
+        </div>
+        <div
+            style="max-width:500px; margin:0 auto; padding:32px; background:var(--surface); border-radius:16px; box-shadow:var(--shadow-lg);">
+            <div style="text-align:center; margin-bottom:24px;">
+                <div id="setting-img-preview"
+                    style="width:120px;height:120px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;overflow:hidden;font-size:4rem;border:2px solid var(--border);cursor:pointer;"
+                    onclick="document.getElementById('setting-img-file').click()">👤</div>
+                <button class="btn btn-ghost"
+                    onclick="document.getElementById('setting-img-file').click()">画像を変更</button>
+                <input type="file" id="setting-img-file" accept="image/*" style="display:none;"
+                    onchange="handleProfileImage(this)">
+                <input type="hidden" id="setting-img-data">
+            </div>
+
+            <div class="field">
+                <label>自分のURL（ログインID）</label>
+                <input type="text" id="setting-id" placeholder="yamada">
+            </div>
+            <div class="field">
+                <label>表示名</label>
+                <input type="text" id="setting-name" placeholder="SADA">
+            </div>
+            <div class="field">
+                <label>誕生日</label>
+                <input type="date" id="setting-bday">
+            </div>
+
+            <div class="field" style="margin-top:32px; padding-top:24px; border-top:1.5px solid var(--border);">
+                <label>パスワード</label>
+                <div style="display:flex; gap:8px;">
+                    <input type="password" id="setting-pass" style="flex:1;" placeholder="1234">
+                    <button class="btn btn-ghost" onclick="togglePassView()"
+                        style="width:50px;font-size:1.2rem;padding:0;display:flex;align-items:center;justify-content:center;"
+                        title="パスワードを表示/非表示">👁</button>
+                </div>
+            </div>
+
+            <div style="margin-top:32px; text-align:center;">
+                <button class="btn btn-primary" style="width:100%; border-radius:100px; padding:12px;"
+                    onclick="saveAllSettings()">設定を保存する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- TOAST -->
+    <div class="toast" id="toast"></div>
+
+    <script>
+        // ============================================================
+        // ROUTING & NAMESPACING
+        // ============================================================
+        let pageUser = new URLSearchParams(window.location.search).get('u') || '';
+        if (!pageUser) {
+            const pathParts = window.location.pathname.split('/').filter(Boolean);
+            const last = pathParts[pathParts.length - 1];
+            if (last && last !== 'akuriya2' && !last.includes('.')) {
+                pageUser = last;
+            }
+        }
+        const storagePrefix = pageUser ? pageUser + '_' : '';
+
+        // ============================================================
+        // AUTH & ADMIN
+        // ============================================================
+        const isSuperAdmin = localStorage.getItem('admin_session') === 'true';
+        const currentLoggedIn = localStorage.getItem('logged_in_user');
+
+        let isAdmin = false;
+        if (isSuperAdmin || (pageUser && currentLoggedIn === pageUser)) {
+            isAdmin = true;
+        }
+
+        if (!pageUser && !isSuperAdmin) {
+            document.body.classList.add('guest-mode');
+        }
+
+        // Nav Toggle logic
+        function toggleMenu() {
+            document.body.classList.toggle('nav-open');
+            updateMenuButton();
+        }
+        function updateMenuButton() {
+            const trigger = document.getElementById('menu-circle-trigger');
+            if (trigger) {
+                const isOpen = document.body.classList.contains('nav-open');
+                trigger.innerHTML = isOpen ? '✕ 閉じる' : 'メニュー';
+                trigger.style.background = isOpen ? 'var(--accent)' : 'var(--ink)';
+            }
+        }
+
+        // Nav Fixed logic
+        function toggleNavFixed() {
+            const isFixed = document.body.classList.toggle('nav-fixed');
+            localStorage.setItem('nav_fixed', isFixed ? 'true' : 'false');
+            if (isFixed) {
+                document.body.classList.remove('nav-open');
+                updateMenuButton();
+            }
+            updatePinButton();
+        }
+        function updatePinButton() {
+            const btn = document.getElementById('nav-pin-btn');
+            if (!btn) return;
+            const isFixed = document.body.classList.contains('nav-fixed');
+            btn.innerHTML = isFixed ? '📍 固定済' : '📌 固定';
+            btn.style.borderColor = isFixed ? 'var(--accent)' : 'var(--border)';
+            btn.style.opacity = isFixed ? '1' : '0.8';
+        }
+        if (localStorage.getItem('nav_fixed') === 'true') {
+            document.body.classList.add('nav-fixed');
+        }
+        updatePinButton();
+
+        function updateAdminUI() {
+            const btn = document.getElementById('nav-login-btn');
+            const regBtn = document.getElementById('nav-register-btn');
+            const adminBtn = document.getElementById('nav-admin-btn');
+            
+            if (isSuperAdmin || currentLoggedIn) {
+                document.body.classList.add('admin-mode');
+                btn.textContent = '🚪 ログアウト';
+                btn.style.background = 'var(--accent)';
+                if (regBtn) regBtn.style.display = 'none';
+                
+                if (isSuperAdmin) {
+                    document.body.classList.add('super-admin-mode');
+                    if (adminBtn) adminBtn.style.display = 'inline-block';
+                } else {
+                    document.body.classList.remove('super-admin-mode');
+                    if (adminBtn) adminBtn.style.display = 'none';
+                }
+            } else {
+                document.body.classList.remove('admin-mode');
+                document.body.classList.remove('super-admin-mode');
+                btn.textContent = '🔑 ログイン';
+                btn.style.background = 'var(--ink)';
+                if (regBtn) regBtn.style.display = 'inline-flex';
+                if (adminBtn) adminBtn.style.display = 'none';
+            }
+        }
+
+        function toggleLoginState() {
+            if (isSuperAdmin || currentLoggedIn) {
+                if (confirm('ログアウトしますか？')) {
+                    localStorage.removeItem('admin_session');
+                    localStorage.removeItem('logged_in_user');
+                    window.location.href = 'index.html';
+                }
+            } else {
+                document.getElementById('login-id').value = '';
+                document.getElementById('login-pass').value = '';
+                document.getElementById('login-modal').classList.add('open');
+                // Close menu if it's open
+                document.body.classList.remove('nav-open');
+                updateMenuButton();
+            }
+        }
+        function closeLoginModal() { 
+            document.getElementById('login-modal').classList.remove('open'); 
+            showPage('home'); 
+        }
+
+        function doLogin() {
+            const id = document.getElementById('login-id').value.trim();
+            const pass = document.getElementById('login-pass').value;
+            if (!id || !pass) { alert('IDとパスワードを入力してください。'); return; }
+
+            // Helper to get global (unprefixed) settings
+            const getGlobal = (k, d) => {
+                const v = localStorage.getItem(k);
+                try { return v ? JSON.parse(v) : d; } catch (e) { return v || d; }
+            };
+
+            const correctAdminId = getGlobal('admin_id', 'admin');
+            const correctAdminPass = getGlobal('admin_pass', '1234');
+            let users = ls('registered_users', {});
+
+            if (id === correctAdminId && pass === correctAdminPass) {
+                localStorage.setItem('admin_session', 'true');
+                closeLoginModal();
+                window.location.reload();
+            } else if (users[id] && users[id] === pass) {
+                localStorage.setItem('logged_in_user', id);
+                closeLoginModal();
+                if (pageUser !== id) window.location.href = 'index.html?u=' + encodeURIComponent(id);
+                else window.location.reload();
+            } else {
+                alert('IDまたはパスワードが違います。');
+            }
+        }
+
+        // ============================================================
+        // NEWS
+        // ============================================================
+        let globalNewsItems = ls('news_list', [
+            { id: 3, date: '2026.03.27', text: 'ゲームにルーレットとおみくじが追加されました！', authorType: 'admin' },
+            { id: 2, date: '2026.03.27', text: 'フォトアルバムの画像追加の不具合（容量超過時のエラー表示）を修正しました。', authorType: 'admin' },
+            { id: 1, date: '2026.03.20', text: 'マイページを公開しました。', authorType: 'admin' }
+        ]);
+        let personalNewsItems = ls('personal_news', []);
+
+        function renderNews() {
+            const list = document.getElementById('home-news-list');
+            const allNews = [...globalNewsItems, ...personalNewsItems].sort((a, b) => b.id - a.id);
+
+            list.innerHTML = allNews.map(n => {
+                const isGlobal = n.authorType === 'admin' || !n.authorType;
+                const canDelete = isGlobal ? isSuperAdmin : isAdmin;
+                const delBtn = canDelete ? `<button class="admin-only" style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:1.3rem;line-height:1;margin-left:12px;" onclick="deleteNews(${n.id}, ${isGlobal})">×</button>` : '';
+                const tag = isGlobal ? `<span style="font-size:0.7rem; background:var(--accent); color:#fff; padding:2px 6px; border-radius:4px; margin-right:8px; white-space:nowrap;">運営</span>` : `<span style="font-size:0.7rem; background:#8aaecc; color:#fff; padding:2px 6px; border-radius:4px; margin-right:8px; white-space:nowrap;">個人</span>`;
+
+                const titleStr = n.title || n.text || '(無題)';
+                const bodyStr = n.body ? `<div id="news-body-${n.id}" style="display:none; font-size:0.9rem; color:var(--ink-muted); line-height:1.6; margin-top:12px; word-wrap:break-word; overflow-wrap:break-word; width:100%;">${n.body.replace(/\n/g, '<br>')}</div>
+                <button onclick="toggleNewsBody(${n.id})" id="news-toggle-${n.id}" style="background:none; border:none; color:var(--accent); font-size:0.8rem; cursor:pointer; margin-top:8px;">▼ 本文を表示</button>` : '';
+
+                return `
+                <li style="flex-direction:column; align-items:flex-start; padding:16px; border-radius:10px; border:1px solid var(--border); margin-bottom:12px; background:var(--surface); width:100%; word-wrap:break-word; overflow-wrap:break-word;">
+                    <div style="display:flex; justify-content:space-between; width:100%; align-items:flex-start; flex-wrap:wrap; gap:8px;">
+                        <div style="display:flex; align-items:center;">
+                            ${tag}
+                            <span class="n-date" style="margin-right:0;font-weight:600;">${n.date}</span>
+                        </div>
+                        ${delBtn}
+                    </div>
+                    <div style="font-weight:700; font-size:1.05rem; margin-top:8px;">${titleStr}</div>
+                    ${bodyStr}
+                </li>
+                `;
+            }).join('');
+        }
+
+        function toggleNewsBody(id) {
+            const el = document.getElementById('news-body-' + id);
+            const btn = document.getElementById('news-toggle-' + id);
+            if(el.style.display === 'none') {
+                el.style.display = 'block';
+                btn.textContent = '▲ 閉じる';
+            } else {
+                el.style.display = 'none';
+                btn.textContent = '▼ 本文を表示';
+            }
+        }
+
+        function openNewsModal() {
+            document.getElementById('news-title').value = '';
+            document.getElementById('news-body').value = '';
+            document.getElementById('news-modal').classList.add('open');
+        }
+        function closeNewsModal() {
+            document.getElementById('news-modal').classList.remove('open');
+        }
+
+        function submitNews() {
+            const title = document.getElementById('news-title').value.trim();
+            const body = document.getElementById('news-body').value.trim();
+            if (!title && !body) { alert('タイトルか本文を入力してください。'); return; }
+
+            const d = new Date();
+            const dateStr = `${d.getFullYear()}.${String(d.getMonth() + 1).padStart(2, '0')}.${String(d.getDate()).padStart(2, '0')}`;
+            const item = { id: Date.now(), date: dateStr, title, body, authorType: isSuperAdmin ? 'admin' : 'user' };
+
+            if (isSuperAdmin) {
+                globalNewsItems.unshift(item);
+                ss('news_list', globalNewsItems);
+            } else {
+                personalNewsItems.unshift(item);
+                ss('personal_news', personalNewsItems);
+            }
+            closeNewsModal();
+            renderNews();
+        }
+
+        function deleteNews(id, isGlobal) {
+            if (isGlobal) {
+                if (!isSuperAdmin) return;
+                if (!confirm('この運営お知らせを削除しますか？')) return;
+                globalNewsItems = globalNewsItems.filter(n => n.id !== id);
+                ss('news_list', globalNewsItems);
+            } else {
+                if (!isAdmin) return;
+                if (!confirm('この個人お知らせを削除しますか？')) return;
+                personalNewsItems = personalNewsItems.filter(n => n.id !== id);
+                ss('personal_news', personalNewsItems);
+            }
+            renderNews();
+        }
+
+        // ============================================================
+        // NAVIGATION
+        // ============================================================
+        function showPage(id) {
+            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
+            document.getElementById('page-' + id).classList.add('active');
+            
+            const btn = document.querySelector(`nav button[data-page="${id}"]`);
+            if(btn) btn.classList.add('active');
+
+            updateHomeCounts();
+            if (id === 'memory') initMemory();
+            if (id === 'word') initWord();
+            if (id === 'settings') initSettingsPage();
+            if (id === 'admin') initAdminPage();
+        }
+        document.querySelectorAll('nav button').forEach(btn => {
+            btn.addEventListener('click', () => showPage(btn.dataset.page));
+        });
+
+        // ============================================================
+        // STORAGE HELPERS
+        // ============================================================
+        function ls(key, def) {
+            const k = (key === 'registered_users' || key === 'admin_id' || key === 'admin_pass' || key === 'roulette_presets' || key === 'news_list') ? key : storagePrefix + key;
+            try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; }
+        }
+        function ss(key, val) {
+            const k = (key === 'registered_users' || key === 'admin_id' || key === 'admin_pass' || key === 'roulette_presets' || key === 'news_list') ? key : storagePrefix + key;
+            localStorage.setItem(k, JSON.stringify(val));
+        }
+
+        // ============================================================
+        // TOAST
+        // ============================================================
+        function toast(msg) {
+            const t = document.getElementById('toast');
+            t.textContent = msg; t.classList.add('show');
+            setTimeout(() => t.classList.remove('show'), 2200);
+        }
+
+        // ============================================================
+        // HOME DATE
+        // ============================================================
+        function initHome() {
+            const d = new Date();
+            const days = ['日', '月', '火', '水', '木', '金', '土'];
+            document.getElementById('home-date-badge').textContent =
+                `${d.getFullYear()}年 ${d.getMonth() + 1}月${d.getDate()}日（${days[d.getDay()]}）`;
+        }
+        function updateHomeCounts() {
+            document.getElementById('home-album-count').textContent = (ls('photos', [])).length + ' 枚';
+            document.getElementById('home-event-count').textContent = (ls('events', [])).length + ' 件';
+            document.getElementById('home-memo-count').textContent = (ls('memos', [])).length + ' 件';
+            document.getElementById('home-bm-count').textContent = (ls('bookmarks', [])).length + ' 件';
+            document.getElementById('home-diary-count').textContent = (ls('diaries', [])).length + ' 件';
+        }
+
+        // ============================================================
+        // PHOTO ALBUM
+        // ============================================================
+        let photos = ls('photos', []);
+        function renderAlbum() {
+            const g = document.getElementById('album-grid');
+            if (!photos.length) {
+                g.innerHTML = `<div class="album-empty"><div class="big-icon">🖼️</div><p>まだ写真がありません。<br>「写真を追加」ボタンから追加できます。</p></div>`;
+                return;
+            }
+            g.innerHTML = photos.map((p, i) => `
+    <div style="display:flex; flex-direction:column; gap:8px;">
+        <div class="album-item" onclick="openLightbox(${i})" style="margin-bottom:0;">
+            <img src="${p.src}" alt="${p.name}" loading="lazy">
+            <div class="overlay"><span class="caption">${p.name}</span></div>
+            <button class="del-btn admin-only" onclick="event.stopPropagation();deletePhoto(${i})">✕</button>
+        </div>
+        ${p.comment ? `<div style="font-size:0.85rem; color:var(--ink); text-align:center; word-wrap:break-word; overflow-wrap:break-word; padding:0 4px;">${p.comment.replace(/\\n/g, '<br>')}</div>` : ''}
+    </div>`).join('');
+        }
+        function addPhotos(e) {
+            const files = Array.from(e.target.files);
+            if (!files.length) return;
+            let loaded = 0;
+
+            const processDone = () => {
+                loaded++;
+                if (loaded === files.length) {
+                    try {
+                        ss('photos', photos);
+                        renderAlbum(); updateHomeCounts();
+                        toast(`📷 ${loaded}枚追加しました！`);
+                    } catch (err) {
+                        toast('⚠️ 容量オーバーです。古い写真を削除してから再度お試しください。');
+                    }
+                }
+            };
+
+            files.forEach(f => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const max = 800;
+                    if (w > max || h > max) {
+                        if (w > h) { h *= max / w; w = max; }
+                        else { w *= max / h; h = max; }
+                    }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    photos.push({ src: dataUrl, name: f.name, date: Date.now() });
+                    processDone();
+                };
+                img.onerror = processDone;
+                img.src = URL.createObjectURL(f);
+            });
+            e.target.value = '';
+        }
+        function deletePhoto(i) {
+            if (!confirm('この写真を削除しますか？')) return;
+            photos.splice(i, 1); ss('photos', photos); renderAlbum(); updateHomeCounts();
+            toast('削除しました。');
+        }
+        let currentLightboxIndex = -1;
+        function openLightbox(i) {
+            currentLightboxIndex = i;
+            const p = photos[i];
+            document.getElementById('lightbox-img').src = p.src;
+            document.getElementById('lightbox-caption').textContent = p.name;
+            document.getElementById('lightbox-comment-text').innerHTML = (p.comment || '').replace(/\n/g, '<br>');
+            document.getElementById('lightbox').classList.add('open');
+        }
+        function closeLightbox(e, force = false) { 
+            if (force || e.target.id === 'lightbox') {
+                document.getElementById('lightbox').classList.remove('open');
+            }
+        }
+        function editPhotoComment(e) {
+            e.stopPropagation();
+            if (!isAdmin || currentLightboxIndex === -1) return;
+            const p = photos[currentLightboxIndex];
+            const newComment = prompt('写真のコメントを入力してください', p.comment || '');
+            if (newComment !== null) {
+                p.comment = newComment;
+                ss('photos', photos);
+                document.getElementById('lightbox-comment-text').innerHTML = newComment.replace(/\n/g, '<br>');
+                renderAlbum();
+            }
+        }
+
+        // ============================================================
+        // CALENDAR
+        // ============================================================
+        let calDate = new Date();
+        let events = ls('events', []);
+
+        function renderCal() {
+            const y = calDate.getFullYear(), m = calDate.getMonth();
+            document.getElementById('cal-title').textContent = `${y}年 ${m + 1}月`;
+            const first = new Date(y, m, 1).getDay();
+            const last = new Date(y, m + 1, 0).getDate();
+            const today = new Date();
+            let html = '';
+            for (let i = 0; i < first; i++) {
+                const d = new Date(y, m, 0 - (first - 1 - i));
+                html += `<div class="cal-day other-month sun".replace('sun',['sun','','','','','','sat'][i])>
+      <div class="day-num">${d.getDate()}</div></div>`;
+            }
+            for (let d = 1; d <= last; d++) {
+                const date = new Date(y, m, d);
+                const dStr = fmtDate(date);
+                const dow = date.getDay();
+                const isToday = date.toDateString() === today.toDateString();
+                const cls = [isToday ? 'today' : '', dow === 0 ? 'sun' : dow === 6 ? 'sat' : ''].filter(Boolean).join(' ');
+                const dayEvents = events.filter(e => e.date === dStr);
+                const dots = dayEvents.map(e => {
+                    const timeStr = e.time ? `${e.time} ` : '';
+                    return `<div class="event-dot" style="background:${e.color || 'var(--accent2)'}" title="${timeStr}${e.title}">${timeStr}${e.title}</div>`;
+                }).join('');
+                html += `<div class="cal-day ${cls}" onclick="openEventModal('${dStr}')">
+      <div class="day-num">${d}</div>${dots}</div>`;
+            }
+            document.getElementById('cal-days').innerHTML = html;
+            renderEventList();
+        }
+        function fmtDate(d) {
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+        function changeMonth(dir) { calDate.setMonth(calDate.getMonth() + dir); renderCal(); }
+        function openEventModal(dateStr) {
+            document.getElementById('ev-date').value = dateStr || fmtDate(new Date());
+            document.getElementById('ev-time').value = '';
+            document.getElementById('ev-title').value = '';
+            document.getElementById('ev-memo').value = '';
+            document.getElementById('event-modal').classList.add('open');
+        }
+        function closeEventModal() { document.getElementById('event-modal').classList.remove('open'); }
+        function addEvent() {
+            if (!isAdmin) return;
+            const d = document.getElementById('ev-date').value;
+            const tm = document.getElementById('ev-time').value;
+            const t = document.getElementById('ev-title').value.trim();
+            if (!d || !t) { toast('日付とタイトルを入力してください。'); return; }
+            events.push({
+                id: Date.now(), date: d, time: tm, title: t,
+                memo: document.getElementById('ev-memo').value,
+                color: document.getElementById('ev-color').value
+            });
+            ss('events', events); closeEventModal(); renderCal(); updateHomeCounts();
+            toast('📅 予定を追加しました！');
+        }
+        function deleteEvent(id) {
+            if (!isAdmin) return;
+            events = events.filter(e => e.id !== id);
+            ss('events', events); renderCal(); updateHomeCounts();
+        }
+        function renderEventList() {
+            const sorted = [...events].sort((a, b) => {
+                if (a.date !== b.date) return a.date.localeCompare(b.date);
+                return (a.time || '').localeCompare(b.time || '');
+            });
+            const html = sorted.map(e => `
+    <div class="event-item">
+      <div class="ei-dot" style="background:${e.color || 'var(--accent2)'}"></div>
+      <div class="ei-info">
+        <div class="ei-date">${e.date}${e.time ? ' ' + e.time : ''}</div>
+        <div class="ei-title">${e.title}${e.memo ? ' — ' + e.memo : ''}</div>
+      </div>
+      <button class="admin-only" onclick="deleteEvent(${e.id})" title="削除">🗑</button>
+    </div>`).join('');
+            document.getElementById('event-list').innerHTML = html;
+        }
+
+        // ============================================================
+        // MEMO
+        // ============================================================
+        let memos = ls('memos', []);
+        let currentMemoId = null;
+
+        function renderMemoList() {
+            const el = document.getElementById('memo-list');
+            if (!memos.length) { el.innerHTML = '<p style="font-size:.82rem;color:var(--ink-muted)">メモがありません。</p>'; return; }
+            el.innerHTML = memos.map(m => `
+    <div class="memo-list-item ${m.id === currentMemoId ? 'selected' : ''}" onclick="selectMemo(${m.id})">
+      <div class="mt">${m.title || '（無題）'}</div>
+      <div class="md">${new Date(m.updated).toLocaleDateString('ja-JP')}</div>
+    </div>`).join('');
+        }
+        function newMemo() {
+            const m = { id: Date.now(), title: '', body: '', updated: Date.now() };
+            memos.unshift(m); currentMemoId = m.id;
+            ss('memos', memos); renderMemoList();
+            document.getElementById('memo-title').value = '';
+            document.getElementById('memo-body').value = '';
+            document.getElementById('memo-save-status').textContent = '新規作成中...';
+            document.getElementById('memo-title').focus();
+            updateHomeCounts();
+        }
+        function selectMemo(id) {
+            currentMemoId = id;
+            const m = memos.find(x => x.id === id);
+            document.getElementById('memo-title').value = m.title;
+            document.getElementById('memo-body').value = m.body;
+            document.getElementById('memo-save-status').textContent =
+                '最終保存: ' + new Date(m.updated).toLocaleString('ja-JP');
+            renderMemoList();
+        }
+        function saveMemo() {
+            if (!currentMemoId) return;
+            const m = memos.find(x => x.id === currentMemoId);
+            if (!m) return;
+            m.title = document.getElementById('memo-title').value;
+            m.body = document.getElementById('memo-body').value;
+            m.updated = Date.now();
+            ss('memos', memos); renderMemoList();
+            document.getElementById('memo-save-status').textContent = '保存済み ✓';
+        }
+        function deleteMemo() {
+            if (!currentMemoId || !confirm('このメモを削除しますか？')) return;
+            memos = memos.filter(m => m.id !== currentMemoId);
+            currentMemoId = null;
+            ss('memos', memos); renderMemoList();
+            document.getElementById('memo-title').value = '';
+            document.getElementById('memo-body').value = '';
+            document.getElementById('memo-save-status').textContent = '空';
+            updateHomeCounts(); toast('削除しました。');
+        }
+
+        // ============================================================
+        // BOOKMARKS
+        // ============================================================
+        let bookmarks = ls('bookmarks', []);
+        function renderBookmarks() {
+            const g = document.getElementById('bm-grid');
+            if (!bookmarks.length) {
+                g.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;color:var(--ink-muted)">
+      <div style="font-size:2.5rem;margin-bottom:12px">🔖</div>
+      <p>まだブックマークがありません。</p></div>`;
+                return;
+            }
+            g.innerHTML = bookmarks.map((b, i) => {
+                const domain = (() => { try { return new URL(b.url).hostname; } catch { return ''; } })();
+                const favicon = domain ? `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" alt="">` : '🌐';
+                return `<div class="bm-card">
+      <div class="bm-favicon">${favicon}</div>
+      <h4>${b.name}</h4>
+      <a href="${b.url}" target="_blank" rel="noopener">${b.url}</a>
+      ${b.desc ? `<div class="bm-desc">${b.desc}</div>` : ''}
+      ${b.tag ? `<span class="bm-tag">${b.tag}</span>` : ''}
+      <button class="bm-del admin-only" onclick="deleteBookmark(${i})" title="削除">✕</button>
+    </div>`;
+            }).join('');
+        }
+        function addBookmark() {
+            const name = document.getElementById('bm-name').value.trim();
+            const url = document.getElementById('bm-url').value.trim();
+            if (!name || !url) { toast('サイト名とURLを入力してください。'); return; }
+            bookmarks.push({
+                name, url, desc: document.getElementById('bm-desc').value,
+                tag: document.getElementById('bm-tag').value
+            });
+            ss('bookmarks', bookmarks); renderBookmarks(); updateHomeCounts();
+            ['bm-name', 'bm-url', 'bm-desc', 'bm-tag'].forEach(id => document.getElementById(id).value = '');
+            toast('🔖 ブックマークを追加しました！');
+        }
+        function deleteBookmark(i) {
+            bookmarks.splice(i, 1); ss('bookmarks', bookmarks); renderBookmarks(); updateHomeCounts();
+        }
+
+        // ============================================================
+        // DIARY
+        // ============================================================
+        let diaries = ls('diaries', []);
+        let selectedMood = '😀';
+        let diaryFormOpen = false;
+
+        function toggleDiaryForm() {
+            diaryFormOpen = !diaryFormOpen;
+            const f = document.getElementById('diary-form');
+            f.style.display = diaryFormOpen ? 'block' : 'none';
+            if (diaryFormOpen) {
+                const d = new Date();
+                document.getElementById('diary-form-date-input').value = fmtDate(d);
+                document.getElementById('diary-title').value = '';
+                document.getElementById('diary-body').value = '';
+                selectedMood = '😀';
+                document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+                document.querySelector('.mood-btn').classList.add('selected');
+            }
+        }
+        function selectMood(btn) {
+            document.querySelectorAll('.mood-btn').forEach(b => b.classList.remove('selected'));
+            btn.classList.add('selected');
+            selectedMood = btn.dataset.mood;
+        }
+        function saveDiary() {
+            if (!isAdmin) return;
+            const title = document.getElementById('diary-title').value.trim();
+            const body = document.getElementById('diary-body').value.trim();
+            if (!body) { toast('日記の本文を入力してください。'); return; }
+            const dStr = document.getElementById('diary-form-date-input').value;
+            const parts = dStr.split('-');
+            const mdStr = parts.length === 3 ? `${parseInt(parts[1])}月${parseInt(parts[2])}日` : '';
+            diaries.unshift({
+                id: Date.now(),
+                date: dStr,
+                title: title || `${mdStr}の日記`,
+                body, mood: selectedMood
+            });
+            ss('diaries', diaries); renderDiaries(); toggleDiaryForm(); updateHomeCounts();
+            toast('📔 日記を保存しました！');
+        }
+        function deleteDiaryEntry(id) {
+            if (!isAdmin) return;
+            if (!confirm('この日記を削除しますか？')) return;
+            diaries = diaries.filter(d => d.id !== id);
+            ss('diaries', diaries); renderDiaries(); updateHomeCounts();
+        }
+        function renderDiaries() {
+            const el = document.getElementById('diary-entries');
+            if (!diaries.length) {
+                el.innerHTML = `<div style="text-align:center;padding:60px;color:var(--ink-muted)">
+      <div style="font-size:2.5rem;margin-bottom:12px">📔</div>
+      <p>日記がまだありません。毎日の出来事や気持ちを書いてみよう！</p></div>`;
+                return;
+            }
+            el.innerHTML = diaries.map(d => `
+    <div class="diary-entry">
+      <div class="de-date">${d.date}</div>
+      <div class="de-mood">${d.mood}</div>
+      <h3>${d.title}</h3>
+      <p>${d.body}</p>
+      <div class="de-actions admin-only">
+        <button class="btn btn-danger" onclick="deleteDiaryEntry(${d.id})">削除</button>
+      </div>
+    </div>`).join('');
+        }
+
+        // ============================================================
+        // GAMES — MINESWEEPER
+        // ============================================================
+        let mineGrid = [], mineRevealed = [], mineFlagged = [];
+        let mineW, mineH, mineTotal, mineLeft, mineStarted = false, mineTimer = 0, mineInterval;
+
+        function getMineConfig() {
+            const v = document.getElementById('mine-level').value;
+            return v === 'easy' ? { w: 8, h: 8, n: 10 } : { w: 12, h: 12, n: 20 };
+        }
+        function initMine() {
+            clearInterval(mineInterval); mineTimer = 0; mineStarted = false;
+            document.getElementById('mine-timer').textContent = '0';
+            document.getElementById('mine-status').textContent = '';
+            const { w, h, n } = getMineConfig();
+            mineW = w; mineH = h; mineTotal = n; mineLeft = n;
+            document.getElementById('mine-count').textContent = n;
+            mineGrid = Array.from({ length: h }, () => Array(w).fill(0));
+            mineRevealed = Array.from({ length: h }, () => Array(w).fill(false));
+            mineFlagged = Array.from({ length: h }, () => Array(w).fill(false));
+            renderMineBoard();
+        }
+        function placeMines(skipR, skipC) {
+            let placed = 0;
+            while (placed < mineTotal) {
+                const r = Math.floor(Math.random() * mineH), c = Math.floor(Math.random() * mineW);
+                if (mineGrid[r][c] === -1 || (Math.abs(r - skipR) <= 1 && Math.abs(c - skipC) <= 1)) continue;
+                mineGrid[r][c] = -1; placed++;
+            }
+            for (let r = 0; r < mineH; r++) for (let c = 0; c < mineW; c++) {
+                if (mineGrid[r][c] === -1) continue;
+                let cnt = 0;
+                for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) {
+                    const nr = r + dr, nc = c + dc;
+                    if (nr >= 0 && nr < mineH && nc >= 0 && nc < mineW && mineGrid[nr][nc] === -1) cnt++;
+                }
+                mineGrid[r][c] = cnt;
+            }
+        }
+        function renderMineBoard() {
+            const b = document.getElementById('mine-board');
+            b.style.gridTemplateColumns = `repeat(${mineW},32px)`;
+            b.innerHTML = '';
+            for (let r = 0; r < mineH; r++) for (let c = 0; c < mineW; c++) {
+                const cell = document.createElement('div');
+                cell.className = 'mine-cell';
+                const rev = mineRevealed[r][c], flag = mineFlagged[r][c];
+                if (rev) {
+                    cell.classList.add('revealed');
+                    if (mineGrid[r][c] === -1) { cell.classList.add('mine-hit'); cell.textContent = '💣'; }
+                    else if (mineGrid[r][c] > 0) { cell.textContent = mineGrid[r][c]; cell.classList.add('n' + mineGrid[r][c]); }
+                } else if (flag) {
+                    cell.classList.add('flagged'); cell.textContent = '🚩';
+                }
+                cell.addEventListener('click', () => mineClick(r, c));
+                cell.addEventListener('contextmenu', e => { e.preventDefault(); mineFlag(r, c); });
+                b.appendChild(cell);
+            }
+        }
+        function mineClick(r, c) {
+            if (mineRevealed[r][c] || mineFlagged[r][c]) return;
+            if (!mineStarted) {
+                placeMines(r, c); mineStarted = true;
+                mineInterval = setInterval(() => {
+                    mineTimer++; document.getElementById('mine-timer').textContent = mineTimer;
+                }, 1000);
+            }
+            if (mineGrid[r][c] === -1) {
+                mineRevealed[r][c] = true; clearInterval(mineInterval);
+                revealAll(); renderMineBoard();
+                document.getElementById('mine-status').textContent = '💥 ゲームオーバー...';
+                return;
+            }
+            mineReveal(r, c); renderMineBoard(); checkMineWin();
+        }
+        function mineReveal(r, c) {
+            if (r < 0 || r >= mineH || c < 0 || c >= mineW || mineRevealed[r][c] || mineFlagged[r][c]) return;
+            mineRevealed[r][c] = true;
+            if (mineGrid[r][c] === 0) {
+                for (let dr = -1; dr <= 1; dr++) for (let dc = -1; dc <= 1; dc++) mineReveal(r + dr, c + dc);
+            }
+        }
+        function mineFlag(r, c) {
+            if (mineRevealed[r][c]) return;
+            mineFlagged[r][c] = !mineFlagged[r][c];
+            mineLeft += mineFlagged[r][c] ? -1 : 1;
+            document.getElementById('mine-count').textContent = mineLeft;
+            renderMineBoard();
+        }
+        function revealAll() { for (let r = 0; r < mineH; r++) for (let c = 0; c < mineW; c++) mineRevealed[r][c] = true; }
+        function checkMineWin() {
+            for (let r = 0; r < mineH; r++) for (let c = 0; c < mineW; c++) {
+                if (mineGrid[r][c] !== -1 && !mineRevealed[r][c]) return;
+            }
+            clearInterval(mineInterval);
+            document.getElementById('mine-status').textContent = `🎉 クリア！${mineTimer}秒`;
+        }
+
+        // ============================================================
+        // GAMES — MEMORY
+        // ============================================================
+        const memEmojis = ['🐶', '🐱', '🐸', '🦊', '🐻', '🐼', '🦁', '🐯'];
+        let memCards = [], memFlipped = [], memMatched = new Set(), memFlipCount = 0, memLock = false;
+        function initMemory() {
+            memFlipCount = 0; memMatched = new Set(); memLock = false; memFlipped = [];
+            document.getElementById('mem-flips').textContent = '0';
+            document.getElementById('mem-matches').textContent = '0';
+            const doubled = [...memEmojis, ...memEmojis].sort(() => Math.random() - .5);
+            memCards = doubled;
+            const b = document.getElementById('mem-board');
+            b.innerHTML = doubled.map((_, i) => `
+    <div class="mem-card" id="mc${i}" onclick="flipMemCard(${i})">
+      <div class="mem-card-inner">
+        <div class="mem-card-front">🎴</div>
+        <div class="mem-card-back">${doubled[i]}</div>
+      </div>
+    </div>`).join('');
+        }
+        function flipMemCard(i) {
+            if (memLock || memFlipped.includes(i) || memMatched.has(i)) return;
+            document.getElementById('mc' + i).classList.add('flipped');
+            memFlipped.push(i);
+            if (memFlipped.length === 2) {
+                memFlipCount++; document.getElementById('mem-flips').textContent = memFlipCount;
+                memLock = true;
+                const [a, b] = memFlipped;
+                if (memCards[a] === memCards[b]) {
+                    memMatched.add(a); memMatched.add(b);
+                    document.getElementById('mc' + a).classList.add('matched');
+                    document.getElementById('mc' + b).classList.add('matched');
+                    document.getElementById('mem-matches').textContent = memMatched.size / 2;
+                    memFlipped = []; memLock = false;
+                    if (memMatched.size === 16) toast('🎉 全部そろった！おめでとう！');
+                } else {
+                    setTimeout(() => {
+                        document.getElementById('mc' + a).classList.remove('flipped');
+                        document.getElementById('mc' + b).classList.remove('flipped');
+                        memFlipped = []; memLock = false;
+                    }, 900);
+                }
+            }
+        }
+
+        // ============================================================
+        // GAMES — WORD (HANGMAN)
+        // ============================================================
+        const wordList = [
+            { word: 'SAKURA', hint: '日本の春の花' },
+            { word: 'RAMEN', hint: '日本の人気麺料理' },
+            { word: 'TOKYO', hint: '日本の首都' },
+            { word: 'MANGA', hint: '日本の漫画' },
+            { word: 'ANIME', hint: '日本のアニメーション' },
+            { word: 'SUSHI', hint: '日本食' },
+            { word: 'FUJI', hint: '日本一高い山' },
+            { word: 'NINJA', hint: '忍者' },
+            { word: 'SAMURAI', hint: '侍' },
+            { word: 'HAIKU', hint: '短い詩の形式（5・7・5）' },
+            { word: 'KATANA', hint: '刀' },
+            { word: 'ORIGAMI', hint: '折り紙' },
+            { word: 'KIMONO', hint: '着物' },
+            { word: 'TAIKO', hint: '大きな太鼓' },
+            { word: 'BONSAI', hint: '盆栽' },
+        ];
+        let wWord = '', wGuessed = new Set(), wWrong = [], wMaxWrong = 6;
+        function initWord() {
+            const w = wordList[Math.floor(Math.random() * wordList.length)];
+            wWord = w.word; wGuessed = new Set(); wWrong = [];
+            document.getElementById('word-hint').textContent = 'ヒント: ' + w.hint;
+            document.getElementById('word-result').textContent = '';
+            renderWord();
+        }
+        function renderWord() {
+            const display = document.getElementById('word-display');
+            display.innerHTML = wWord.split('').map(l =>
+                `<div class="word-letter">${wGuessed.has(l) ? l : ''}</div>`).join('');
+            const livesEl = document.getElementById('hangman-lives');
+            livesEl.innerHTML = Array(wMaxWrong).fill(0).map((_, i) =>
+                `<div class="life-dot ${i >= wMaxWrong - wWrong.length ? 'lost' : ''}"></div>`).join('');
+            const wrongEl = document.getElementById('wrong-letters');
+            wrongEl.innerHTML = wWrong.map(l => `<div class="wrong-letter">${l}</div>`).join('');
+            const kb = document.getElementById('keyboard');
+            const alpha = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            kb.innerHTML = alpha.split('').map(l => {
+                const used = wGuessed.has(l);
+                const cls = used ? (wWord.includes(l) ? 'correct' : 'wrong') : '';
+                return `<button class="key-btn ${cls}" ${used ? 'disabled' : ''} onclick="guessLetter('${l}')">${l}</button>`;
+            }).join('');
+        }
+        function guessLetter(l) {
+            if (wGuessed.has(l)) return;
+            wGuessed.add(l);
+            if (!wWord.includes(l)) wWrong.push(l);
+            const won = wWord.split('').every(c => wGuessed.has(c));
+            const lost = wWrong.length >= wMaxWrong;
+            renderWord();
+            if (won) document.getElementById('word-result').textContent = '🎉 正解！答えは「' + wWord + '」！';
+            else if (lost) document.getElementById('word-result').textContent = '😢 残念... 答えは「' + wWord + '」でした。';
+        }
+        function switchGame(id, btn) {
+            document.querySelectorAll('.game-panel').forEach(p => p.classList.remove('active'));
+            document.querySelectorAll('.game-tab').forEach(b => b.classList.remove('active'));
+            document.getElementById('game-' + id).classList.add('active');
+            btn.classList.add('active');
+        }
+
+        // ============================================================
+        // GAMES — JANKEN
+        // ============================================================
+        let jankenPlaying = false;
+        function playJanken(playerHand) {
+            if (jankenPlaying) return;
+            jankenPlaying = true;
+
+            const hands = ['rock', 'scissors', 'paper'];
+            const emoji = { rock: '✊', scissors: '✌️', paper: '✋' };
+            const cpuHand = hands[Math.floor(Math.random() * hands.length)];
+
+            const statusEl = document.getElementById('janken-status');
+            const resultEl = document.getElementById('janken-result');
+            const cpuEl = document.getElementById('jk-cpu');
+            const playerEl = document.getElementById('jk-player');
+            const btns = document.querySelectorAll('.janken-btn');
+
+            btns.forEach(b => b.disabled = true);
+            resultEl.innerHTML = '';
+            statusEl.textContent = 'じゃーんけーん...';
+            cpuEl.textContent = '✊';
+            playerEl.textContent = '✊';
+            cpuEl.classList.add('hand-anim');
+            playerEl.classList.add('hand-anim');
+
+            setTimeout(() => {
+                cpuEl.classList.remove('hand-anim');
+                playerEl.classList.remove('hand-anim');
+
+                statusEl.textContent = '結果発表！';
+                cpuEl.textContent = emoji[cpuHand];
+                playerEl.textContent = emoji[playerHand];
+
+                let result = '';
+                if (playerHand === cpuHand) result = 'あいこ！';
+                else if (
+                    (playerHand === 'rock' && cpuHand === 'scissors') ||
+                    (playerHand === 'scissors' && cpuHand === 'paper') ||
+                    (playerHand === 'paper' && cpuHand === 'rock')
+                ) {
+                    result = '🎉 あなたの勝ち！';
+                } else {
+                    result = '😢 あなたの負け...';
+                }
+
+                resultEl.textContent = result;
+                jankenPlaying = false;
+                btns.forEach(b => b.disabled = false);
+            }, 1500);
+        }
+
+        // ============================================================
+        // GAMES — ROULETTE
+        // ============================================================
+        let rouletteSpinning = false;
+        let rouletteAngle = 0;
+
+        function getRouletteItems() {
+            const str = document.getElementById('roulette-items').value.trim();
+            ss('roulette_items', str);
+            if (!str) return ['?'];
+            return str.split(',').map(s => s.trim()).filter(Boolean);
+        }
+
+        function drawRoulette() {
+            const canvas = document.getElementById('roulette-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            const items = getRouletteItems();
+            const w = canvas.width, h = canvas.height;
+            const cx = w / 2, cy = h / 2;
+            const r = cx;
+
+            ctx.clearRect(0, 0, w, h);
+
+            if (items.length === 0) return;
+
+            const sliceAngle = (2 * Math.PI) / items.length;
+            const colors = ['#c8a96e', '#7c9e8a', '#8aaecc', '#b08ec8', '#c97b7b', '#6aaccc', '#e6c875', '#85c29a', '#9ebddd', '#c3a6da', '#db9595', '#82c0de'];
+
+            for (let i = 0; i < items.length; i++) {
+                const startAngle = i * sliceAngle - Math.PI / 2;
+                const endAngle = startAngle + sliceAngle;
+
+                ctx.beginPath();
+                ctx.moveTo(cx, cy);
+                ctx.arc(cx, cy, r, startAngle, endAngle);
+                ctx.fillStyle = colors[i % colors.length];
+                ctx.fill();
+                ctx.lineWidth = 2;
+                ctx.strokeStyle = '#fff';
+                ctx.stroke();
+
+                ctx.save();
+                ctx.translate(cx, cy);
+                ctx.rotate(startAngle + sliceAngle / 2);
+                ctx.textAlign = 'right';
+                ctx.fillStyle = '#fff';
+                ctx.font = 'bold 24px "Shippori Mincho", serif';
+                ctx.shadowColor = 'rgba(0,0,0,0.3)';
+                ctx.shadowBlur = 4;
+                ctx.shadowOffsetY = 1;
+                const text = items[i].length > 6 ? items[i].substring(0, 5) + '...' : items[i];
+                ctx.fillText(text, r - 30, 8);
+                ctx.restore();
+            }
+        }
+
+        function spinRoulette() {
+            if (rouletteSpinning) return;
+            const items = getRouletteItems();
+            if (items.length === 0 || items[0] === '?') { toast('項目を入力してください。'); return; }
+
+            rouletteSpinning = true;
+            document.getElementById('roulette-btn').disabled = true;
+
+            const canvas = document.getElementById('roulette-canvas');
+
+            const targetIndex = Math.floor(Math.random() * items.length);
+            const sliceDeg = 360 / items.length;
+            const targetRotation = 360 - (targetIndex * sliceDeg + sliceDeg / 2);
+
+            const spins = 10 * 360;
+            const remainder = rouletteAngle % 360;
+            const spinTo = rouletteAngle - remainder + spins + targetRotation;
+
+            rouletteAngle = spinTo;
+            canvas.style.transform = `rotate(${rouletteAngle}deg)`;
+
+            setTimeout(() => {
+                rouletteSpinning = false;
+                document.getElementById('roulette-btn').disabled = false;
+                toast(`🎡「${items[targetIndex]}」が選ばれました！`);
+            }, 3000);
+        }
+
+        let roulettePresets = ls('roulette_presets', []);
+        function renderRoulettePresets() {
+            const container = document.getElementById('roulette-presets');
+            if (!container) return;
+            container.innerHTML = roulettePresets.map((preset, i) => `
+                <div style="display:flex; align-items:center; background:var(--surface); border:1.5px solid var(--border); border-radius:100px; padding:4px 12px; font-size:.8rem;">
+                    <span style="cursor:pointer; flex:1;" onclick="loadRoulettePreset(${i})">${preset.length > 15 ? preset.substring(0, 15) + '...' : preset}</span>
+                    <button style="margin-left:8px; background:none; border:none; cursor:pointer; font-size:1.1rem; line-height:1; color:var(--ink-muted);" onclick="deleteRoulettePreset(${i})">×</button>
+                </div>
+            `).join('');
+        }
+        function saveRoulettePreset() {
+            const str = document.getElementById('roulette-items').value.trim();
+            if (!str) return;
+            if (!roulettePresets.includes(str)) {
+                roulettePresets.push(str);
+                ss('roulette_presets', roulettePresets);
+                renderRoulettePresets();
+                toast('📝 プリセットを保存しました！');
+            } else {
+                toast('同じ内容がすでに保存されています。');
+            }
+        }
+        function loadRoulettePreset(i) {
+            document.getElementById('roulette-items').value = roulettePresets[i];
+            drawRoulette();
+            toast('📝 プリセットを読み込みました！');
+        }
+        function deleteRoulettePreset(i) {
+            roulettePresets.splice(i, 1);
+            ss('roulette_presets', roulettePresets);
+            renderRoulettePresets();
+        }
+
+        // ============================================================
+        // GAMES — OMIKUJI
+        // ============================================================
+        let omikujiState = 'init';
+        function shakeOmikujiBox() {
+            if (omikujiState !== 'init') return;
+            omikujiState = 'shaking';
+            const box = document.getElementById('omikuji-box');
+            const inst = document.getElementById('omikuji-inst');
+
+            box.classList.add('shaking');
+            inst.textContent = 'シャカシャカシャカ...';
+
+            setTimeout(() => {
+                box.classList.remove('shaking');
+                box.style.display = 'none';
+                inst.textContent = '1本選んでください...';
+
+                const slipsArea = document.getElementById('omikuji-slips');
+                slipsArea.style.display = 'flex';
+                slipsArea.innerHTML = '';
+
+                for (let i = 0; i < 7; i++) {
+                    const slip = document.createElement('div');
+                    slip.className = 'omi-slip';
+                    slip.textContent = '🎋おみくじ🎋';
+                    slip.style.animationDelay = `${i * 0.08}s`;
+                    slip.onclick = () => showOmikujiResult();
+                    slipsArea.appendChild(slip);
+                }
+                omikujiState = 'selecting';
+            }, 1200);
+        }
+
+        function showOmikujiResult() {
+            if (omikujiState !== 'selecting') return;
+            omikujiState = 'result';
+
+            document.getElementById('omikuji-inst').textContent = '結果は...';
+            document.getElementById('omikuji-slips').style.display = 'none';
+
+            const fortunes = [
+                { t: '大吉', c: '#c05050', desc: '最高の運勢です！何事にも積極的に取り組みましょう。新しいことへの挑戦が吉。', lc: '赤・橙', ln: '1, 7' },
+                { t: '吉', c: '#d48a40', desc: '良い運気が続いています。焦らずじっくり取り組むことで良い結果が生まれます。', lc: '黄・オレンジ', ln: '3, 5' },
+                { t: '中吉', c: '#c8a96e', desc: '運気は上昇中！1歩1歩着実に進むことで大きな成果につながります。', lc: '緑・茶', ln: '2, 8' },
+                { t: '小吉', c: '#7c9e8a', desc: '小さな幸運が積み重なる時期。身近な人への感謝を忘れずに。', lc: '水色・緑', ln: '4, 6' },
+                { t: '末吉', c: '#6aaccc', desc: '今は準備の時期。焦らず土台をしっかり固めることが大切です。', lc: '青・水色', ln: '9, 0' },
+                { t: '凶', c: '#444', desc: '慎重に行動する時期です。無理をせず、周囲との調和を大切に。', lc: '白・灰', ln: '偶数' }
+            ];
+            const rnd = Math.random();
+            let f;
+            if (rnd < 0.25) f = fortunes[0];
+            else if (rnd < 0.45) f = fortunes[1];
+            else if (rnd < 0.65) f = fortunes[2];
+            else if (rnd < 0.8) f = fortunes[3];
+            else if (rnd < 0.95) f = fortunes[4];
+            else f = fortunes[5];
+
+            const resultArea = document.getElementById('omikuji-result');
+            resultArea.style.display = 'block';
+            resultArea.innerHTML = `
+                <div class="omikuji-result-card">
+                    <div class="omikuji-huge" style="color:${f.c}">${f.t}</div>
+                    <div class="omikuji-desc">
+                        <div><strong>【総合運】</strong><br>${f.desc}</div>
+                        <div style="margin-top:12px; display:flex; gap:16px;">
+                            <div style="flex:1;"><strong>【ラッキーカラー】</strong><br>${f.lc}</div>
+                            <div style="flex:1;"><strong>【ラッキーナンバー】</strong><br>${f.ln}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            document.getElementById('omikuji-reset').style.display = 'block';
+        }
+
+        function resetOmikuji() {
+            omikujiState = 'init';
+            document.getElementById('omikuji-result').style.display = 'none';
+            document.getElementById('omikuji-slips').style.display = 'none';
+            document.getElementById('omikuji-reset').style.display = 'none';
+            document.getElementById('omikuji-box').style.display = 'flex';
+            document.getElementById('omikuji-inst').textContent = '箱をクリックしておみくじを引いてみよう';
+        }
+
+        // ============================================================
+        // PROFILE & SETTINGS
+        // ============================================================
+        function loadProfileData() {
+            const pName = ls('profile_name', 'SADA');
+            const pImg = ls('profile_img', '');
+            const pBday = ls('profile_bday', '');
+
+            const nameEl = document.getElementById('home-profile-name');
+            if (nameEl) nameEl.textContent = pName;
+
+            const sectionHeader = document.getElementById('home-section-header');
+            const nameWrap = document.getElementById('home-name-wrap');
+            if (sectionHeader) sectionHeader.style.display = pageUser ? 'flex' : 'none';
+            if (nameWrap) nameWrap.style.display = pageUser ? 'inline' : 'none';
+
+            const imgEl = document.getElementById('home-profile-img');
+            if (imgEl) {
+                if (pImg) {
+                    imgEl.innerHTML = `<img src="${pImg}" style="width:100%;height:100%;object-fit:cover;">`;
+                } else {
+                    imgEl.innerHTML = '👤';
+                }
+            }
+
+            const bMsg = document.getElementById('home-birthday-msg');
+            if (bMsg) {
+                bMsg.style.display = 'none';
+                if (pBday) {
+                    const today = new Date();
+                    const m = String(today.getMonth() + 1).padStart(2, '0');
+                    const d = String(today.getDate()).padStart(2, '0');
+                    const todayStr = `${m}-${d}`;
+
+                    const parts = pBday.split('-');
+                    if (parts.length === 3) {
+                        const bdayStr = `${parts[1]}-${parts[2]}`;
+                        if (todayStr === bdayStr) {
+                            bMsg.style.display = 'block';
+                        }
+                    }
+                }
+            }
+        }
+
+        function initSettingsPage() {
+            document.getElementById('setting-id').value = pageUser || 'admin';
+            document.getElementById('setting-name').value = ls('profile_name', 'SADA');
+            document.getElementById('setting-bday').value = ls('profile_bday', '');
+            
+            let currentPass = '';
+            if (isSuperAdmin) {
+                currentPass = ls('admin_pass', '1234');
+            } else if (pageUser) {
+                let users = JSON.parse(localStorage.getItem('registered_users')) || {};
+                currentPass = users[pageUser] || '';
+            }
+            document.getElementById('setting-pass').value = currentPass;
+
+            const pImg = ls('profile_img', '');
+            document.getElementById('setting-img-data').value = pImg;
+            document.getElementById('setting-img-preview').innerHTML = pImg ? `<img src="${pImg}" style="width:100%;height:100%;object-fit:cover;">` : '👤';
+
+            const passEl = document.getElementById('setting-pass');
+            passEl.type = 'password';
+
+            if (!isAdmin) {
+                document.getElementById('setting-id').parentElement.style.display = 'none';
+                document.getElementById('setting-pass').parentElement.parentElement.style.display = 'none';
+            } else {
+                document.getElementById('setting-id').parentElement.style.display = 'block';
+                document.getElementById('setting-pass').parentElement.parentElement.style.display = 'block';
+            }
+        }
+
+        function togglePassView() {
+            const passEl = document.getElementById('setting-pass');
+            if (passEl.type === 'password') {
+                passEl.type = 'text';
+            } else {
+                passEl.type = 'password';
+            }
+        }
+
+        function handleProfileImage(input, previewId = 'setting-img-preview', dataId = 'setting-img-data') {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    let w = img.width, h = img.height;
+                    const max = 300;
+                    if (w > max || h > max) {
+                        if (w > h) { h *= max / w; w = max; }
+                        else { w *= max / h; h = max; }
+                    }
+                    canvas.width = w; canvas.height = h;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, w, h);
+                    const b64 = canvas.toDataURL('image/jpeg', 0.8);
+
+                    document.getElementById(previewId).innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;">`;
+                    document.getElementById(dataId).value = b64;
+                };
+                img.src = e.target.result;
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function saveAllSettings() {
+            if (!isAdmin) return;
+            const newId = document.getElementById('setting-id').value.trim();
+            const name = document.getElementById('setting-name').value.trim();
+            const bday = document.getElementById('setting-bday').value;
+            const pass = document.getElementById('setting-pass').value.trim();
+            const b64 = document.getElementById('setting-img-data').value;
+
+            if (newId && !/^[a-zA-Z0-9_-]+$/.test(newId)) {
+                toast('URL(ID)は半角英数字とハイフン、アンダースコアのみです');
+                return;
+            }
+
+            if (name) ss('profile_name', name);
+            if (bday) ss('profile_bday', bday);
+            if (b64) ss('profile_img', b64);
+            
+            let idChanged = false;
+            
+            if (isSuperAdmin) {
+                if (pass) ss('admin_pass', pass);
+                if (newId && newId !== 'admin') {
+                    if (newId === 'register' || newId === 'index') {
+                        toast('そのIDは使用できません');
+                        return;
+                    }
+                    ss('admin_id', newId);
+                    localStorage.setItem('logged_in_user', newId);
+                    idChanged = true;
+                }
+            } else if (pageUser && currentLoggedIn === pageUser) {
+                let users = JSON.parse(localStorage.getItem('registered_users')) || {};
+                if (newId && newId !== pageUser) {
+                    if (users[newId] || newId === 'admin' || newId === 'register' || newId === 'index') {
+                        toast('そのIDはすでに使われているか、使用できません');
+                        return;
+                    }
+                    users[newId] = pass || users[pageUser];
+                    delete users[pageUser];
+                    localStorage.setItem('registered_users', JSON.stringify(users));
+                    
+                    let keysToMigrate = [];
+                    for(let i = 0; i < localStorage.length; i++) {
+                        let k = localStorage.key(i);
+                        if (k.startsWith(pageUser + '_')) {
+                            keysToMigrate.push(k);
+                        }
+                    }
+                    keysToMigrate.forEach(k => {
+                        let v = localStorage.getItem(k);
+                        localStorage.setItem(newId + '_' + k.substring(pageUser.length + 1), v);
+                        localStorage.removeItem(k);
+                    });
+                    
+                    localStorage.setItem('logged_in_user', newId);
+                    idChanged = true;
+                } else if (pass) {
+                    users[pageUser] = pass;
+                    localStorage.setItem('registered_users', JSON.stringify(users));
+                }
+            }
+
+            toast('⚙️ 設定を保存しました！');
+            loadProfileData();
+
+            if (idChanged) {
+                document.getElementById('setting-id').disabled = true;
+                document.getElementById('setting-name').disabled = true;
+                setTimeout(() => {
+                    const newUrl = isSuperAdmin ? 'index.html' : 'index.html?u=' + encodeURIComponent(newId);
+                    window.location.href = newUrl;
+                }, 1000);
+            }
+        }
+
+        // ============================================================
+        // ADMIN FUNCTIONS
+        // ============================================================
+        function initAdminPage() {
+            if (!isSuperAdmin) return;
+            const pName = localStorage.getItem('profile_name') ? JSON.parse(localStorage.getItem('profile_name')) : '運営管理者';
+            const pPass = localStorage.getItem('admin_pass') ? JSON.parse(localStorage.getItem('admin_pass')) : '1234';
+            const pImg = localStorage.getItem('profile_img') ? JSON.parse(localStorage.getItem('profile_img')) : '';
+            const pId = localStorage.getItem('admin_id') || 'admin';
+            
+            document.getElementById('admin-name').value = pName;
+            document.getElementById('admin-pass').value = pPass;
+            document.getElementById('admin-id').value = pId;
+            document.getElementById('admin-img-data').value = pImg;
+            document.getElementById('admin-img-preview').innerHTML = pImg ? `<img src="${pImg}" style="width:100%;height:100%;object-fit:cover;">` : '👤';
+            document.getElementById('admin-pass').type = 'password';
+
+            renderAdminUsersList();
+        }
+
+        function toggleAdminPassView() {
+            const el = document.getElementById('admin-pass');
+            el.type = el.type === 'password' ? 'text' : 'password';
+        }
+
+        function saveAdminSettings() {
+            if (!isSuperAdmin) return;
+            const name = document.getElementById('admin-name').value.trim();
+            const pass = document.getElementById('admin-pass').value.trim();
+            const b64 = document.getElementById('admin-img-data').value;
+            
+            if (name) localStorage.setItem('profile_name', JSON.stringify(name));
+            if (pass) localStorage.setItem('admin_pass', JSON.stringify(pass));
+            if (b64) localStorage.setItem('profile_img', JSON.stringify(b64));
+            
+            toast('👑 管理者設定を保存しました！');
+            loadProfileData(); 
+            initAdminPage();
+        }
+
+        function renderAdminUsersList() {
+            const listEl = document.getElementById('admin-users-list');
+            if (!listEl) return;
+            const users = JSON.parse(localStorage.getItem('registered_users')) || {};
+            const ids = Object.keys(users);
+            if (ids.length === 0) {
+                listEl.innerHTML = '<div style="color:var(--ink-muted); font-size:0.85rem; text-align:center; padding:20px;">登録ユーザーはいません。</div>';
+                return;
+            }
+            
+            listEl.innerHTML = ids.map(id => {
+                const pName = JSON.parse(localStorage.getItem(id + '_profile_name')) || '未設定';
+                const photos = JSON.parse(localStorage.getItem(id + '_photos')) || [];
+                return `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; border:1px solid var(--border); border-radius:10px; background:var(--bg);">
+                    <div>
+                        <div style="font-weight:700; font-size:1.1rem; color:var(--ink);">${pName} <span style="font-size:0.8rem; color:var(--ink-muted); font-weight:normal; margin-left:4px;">(ID: ${id})</span></div>
+                        <div style="font-size:0.8rem; margin-top:6px; color:var(--ink-muted);">
+                            保存写真: ${photos.length}枚
+                        </div>
+                        <div style="font-size:0.8rem; margin-top:8px;">
+                            <a href="index.html?u=${encodeURIComponent(id)}" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:600;">🔗 ユーザーページを見る</a>
+                        </div>
+                    </div>
+                    <button class="btn btn-danger" style="padding:8px 16px; font-size:0.8rem; border-radius:100px;" onclick="deleteUserAccount('${id}')">削除する</button>
+                </div>
+                `;
+            }).join('');
+        }
+
+        function deleteUserAccount(id) {
+            if (!confirm(`本当にユーザー「${id}」を削除しますか？\n関連データ（写真・日記など）もすべて削除されます。`)) return;
+            
+            let users = JSON.parse(localStorage.getItem('registered_users')) || {};
+            delete users[id];
+            localStorage.setItem('registered_users', JSON.stringify(users));
+            
+            let keysToDelete = [];
+            for (let i = 0; i < localStorage.length; i++) {
+                let k = localStorage.key(i);
+                if (k.startsWith(id + '_')) keysToDelete.push(k);
+            }
+            keysToDelete.forEach(k => localStorage.removeItem(k));
+            
+            toast(`🗑️ ユーザー「${id}」を削除しました。`);
+            renderAdminUsersList();
+        }
+
+        // ============================================================
+        // INIT
+        // ============================================================
+        loadProfileData();
+        updateAdminUI();
+        initHome();
+        renderNews();
+        renderAlbum();
+        renderCal();
+        renderMemoList();
+        renderBookmarks();
+        renderDiaries();
+        initMine();
+        initMemory();
+        initWord();
+
+        const savedRl = ls('roulette_items', null);
+        if (savedRl !== null) document.getElementById('roulette-items').value = savedRl;
+        drawRoulette();
+        renderRoulettePresets();
+
+        updateHomeCounts();
+    </script>
+
+    <!-- NEWS MODAL -->
+    <div class="modal-overlay" id="news-modal">
+        <div class="modal" style="max-width:500px;">
+            <h4 style="margin-bottom:20px;">📢 お知らせを投稿</h4>
+            <div class="field"><label>タイトル（見出し・ひとこと）</label><input type="text" id="news-title" placeholder="お知らせのタイトル">
+            </div>
+            <div class="field"><label>本文（任意）</label><textarea id="news-body" placeholder="詳細を入力..."
+                    style="min-height:120px;"></textarea></div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeNewsModal()">キャンセル</button>
+                <button class="btn btn-primary" onclick="submitNews()">投稿する</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIN MODAL -->
+    <div class="modal-overlay" id="login-modal">
+        <div class="modal">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <h4 style="margin-bottom:0;">🔑 ログイン</h4>
+            </div>
+            <div class="field"><label>ID</label><input type="text" id="login-id" placeholder="ユーザーID または admin"></div>
+            <div class="field"><label>パスワード</label><input type="password" id="login-pass" placeholder="パスワード"></div>
+            <div class="modal-actions">
+                <button class="btn btn-ghost" onclick="closeLoginModal()">キャンセル</button>
+                <button class="btn btn-primary" onclick="doLogin()">ログイン</button>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
