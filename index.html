@@ -9,6 +9,14 @@
         href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600;700&family=Outfit:wght@300;400;500;600;700&display=swap"
         rel="stylesheet">
     <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json">
+    <script>
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(() => console.log('Service Worker registered'))
+                .catch(err => console.error('Registration failed', err));
+        }
+    </script>
 </head>
 
 <body>
@@ -20,7 +28,9 @@
     <header>
         <div class="logo">My<span>Portal</span></div>
         <nav>
-            <button id="nav-pin-btn" onclick="toggleNavFixed()" style="margin-bottom:12px; background:var(--bg); border:1.5px dashed var(--border); font-size:0.8rem; justify-content:center; opacity:0.7;">📌 固定する</button>
+            <button id="nav-pin-btn" onclick="toggleNavFixed()"
+                style="margin-bottom:12px; background:var(--bg); border:1.5px dashed var(--border); font-size:0.8rem; justify-content:center; opacity:0.7;">📌
+                固定する</button>
             <button class="active" data-page="home">🏠 ホーム</button>
             <button data-page="album">📷 アルバム</button>
             <button data-page="calendar">📅 カレンダー</button>
@@ -32,10 +42,8 @@
                 設定</button>
             <button id="nav-admin-btn" class="super-admin-only" data-page="admin" style="color:var(--accent);">👑
                 管理</button>
-            <button id="nav-login-btn" onclick="toggleLoginState()"
-                class="btn-primary">🔑 ログイン</button>
-            <a href="register.html" id="nav-register-btn" class="btn btn-primary"
-                style="text-decoration:none;">✨
+            <button id="nav-login-btn" onclick="toggleLoginState()" class="btn-primary">🔑 ログイン</button>
+            <a href="register.html" id="nav-register-btn" class="btn btn-primary" style="text-decoration:none;">✨
                 新規登録</a>
         </nav>
     </header>
@@ -54,7 +62,7 @@
                         👤</div>
                     <div>
                         <h1 style="margin-bottom:6px; font-size:1.8rem;"><span id="home-name-wrap"><span
-                                id="home-profile-name"></span>さん、</span>おかえり！<br>今日もいい一日を。</h1>
+                                    id="home-profile-name"></span>さん、</span>おかえり！<br>今日もいい一日を。</h1>
                         <div id="home-birthday-msg"
                             style="display:none; color:#c97b7b; font-weight:600; font-size:.95rem;">🎂
                             今日はお誕生日！おめでとうございます🎉</div>
@@ -139,9 +147,13 @@
         <button class="lightbox-close" onclick="closeLightbox(event, true)">✕</button>
         <img id="lightbox-img" src="" alt="" onclick="event.stopPropagation()">
         <div class="lightbox-caption" id="lightbox-caption" onclick="event.stopPropagation()"></div>
-        <div id="lightbox-comment-area" style="margin-top:16px; width:100%; max-width:600px; text-align:center;" onclick="event.stopPropagation()">
-            <div id="lightbox-comment-text" style="color:#fff; font-size:1rem; margin-bottom:12px; white-space:pre-wrap; word-wrap:break-word;"></div>
-            <button class="btn btn-ghost admin-only" style="color:#fff; border-color:#fff;" onclick="editPhotoComment(event)">💬 コメントを追加/編集</button>
+        <div id="lightbox-comment-area" style="margin-top:16px; width:100%; max-width:600px; text-align:center;"
+            onclick="event.stopPropagation()">
+            <div id="lightbox-comment-text"
+                style="color:#fff; font-size:1rem; margin-bottom:12px; white-space:pre-wrap; word-wrap:break-word;">
+            </div>
+            <button class="btn btn-ghost admin-only" style="color:#fff; border-color:#fff;"
+                onclick="editPhotoComment(event)">💬 コメントを追加/編集</button>
         </div>
     </div>
 
@@ -208,7 +220,8 @@
         <div style="max-width:1100px;margin:0 auto;padding:0 40px">
             <div class="memo-layout">
                 <div>
-                    <button class="btn btn-primary admin-only" style="width:100%; margin-bottom:12px;" onclick="newMemo()">保存</button>
+                    <button class="btn btn-primary admin-only" style="width:100%; margin-bottom:12px;"
+                        onclick="newMemo()">保存</button>
                     <div id="memo-list"></div>
                 </div>
                 <div class="memo-editor">
@@ -256,8 +269,10 @@
             </div>
             <div class="diary-new-form" id="diary-form" style="display:none">
                 <div class="field" style="margin-bottom:16px;">
-                    <label style="display:flex; align-items:center; gap:8px; font-family:'Shippori Mincho', serif; font-size:1.1rem; color:var(--ink); text-transform:none;">
-                        📔 <input type="date" id="diary-form-date-input" style="border:none; border-bottom:1.5px solid var(--accent); border-radius:0; padding:4px; font-weight:700; font-size:1.1rem; font-family:'Outfit', sans-serif; background:transparent; width:auto; color:var(--ink);">
+                    <label
+                        style="display:flex; align-items:center; gap:8px; font-family:'Shippori Mincho', serif; font-size:1.1rem; color:var(--ink); text-transform:none;">
+                        📔 <input type="date" id="diary-form-date-input"
+                            style="border:none; border-bottom:1.5px solid var(--accent); border-radius:0; padding:4px; font-weight:700; font-size:1.1rem; font-family:'Outfit', sans-serif; background:transparent; width:auto; color:var(--ink);">
                     </label>
                 </div>
                 <div class="field"><label>タイトル</label><input type="text" id="diary-title" placeholder="今日のひとこと...">
@@ -412,16 +427,20 @@
             <h2>👑 サイト管理室</h2><span class="en">Admin Control Panel</span>
         </div>
         <div style="max-width:800px; margin:0 auto; padding:0 40px; display:flex; flex-direction:column; gap:32px;">
-            
+
             <div style="background:var(--surface); border-radius:16px; padding:32px; box-shadow:var(--shadow-lg);">
-                <h3 style="margin-bottom:20px; font-family:'Shippori Mincho', serif; border-bottom:1.5px solid var(--border); padding-bottom:12px;">管理者プロフィール設定</h3>
-                
+                <h3
+                    style="margin-bottom:20px; font-family:'Shippori Mincho', serif; border-bottom:1.5px solid var(--border); padding-bottom:12px;">
+                    管理者プロフィール設定</h3>
+
                 <div style="text-align:center; margin-bottom:24px;">
                     <div id="admin-img-preview"
                         style="width:120px;height:120px;border-radius:50%;background:var(--bg);display:flex;align-items:center;justify-content:center;margin:0 auto 16px;overflow:hidden;font-size:4rem;border:2px solid var(--border);cursor:pointer;"
                         onclick="document.getElementById('admin-img-file').click()">👤</div>
-                    <button class="btn btn-ghost" onclick="document.getElementById('admin-img-file').click()">画像を変更</button>
-                    <input type="file" id="admin-img-file" accept="image/*" style="display:none;" onchange="handleProfileImage(this, 'admin-img-preview', 'admin-img-data')">
+                    <button class="btn btn-ghost"
+                        onclick="document.getElementById('admin-img-file').click()">画像を変更</button>
+                    <input type="file" id="admin-img-file" accept="image/*" style="display:none;"
+                        onchange="handleProfileImage(this, 'admin-img-preview', 'admin-img-data')">
                     <input type="hidden" id="admin-img-data">
                 </div>
                 <div class="field">
@@ -430,23 +449,28 @@
                 </div>
                 <div class="field">
                     <label>管理者ログインID</label>
-                    <input type="text" id="admin-id" placeholder="admin" disabled style="background:#efefef; color:var(--ink-muted); cursor:not-allowed;">
+                    <input type="text" id="admin-id" placeholder="admin" disabled
+                        style="background:#efefef; color:var(--ink-muted); cursor:not-allowed;">
                 </div>
                 <div class="field">
                     <label>管理者パスワード</label>
                     <div style="display:flex; gap:8px;">
                         <input type="password" id="admin-pass" style="flex:1;" placeholder="パスワードを入力">
-                        <button class="btn btn-ghost" onclick="toggleAdminPassView()" style="width:50px;font-size:1.2rem;padding:0;display:flex;align-items:center;justify-content:center;">👁</button>
+                        <button class="btn btn-ghost" onclick="toggleAdminPassView()"
+                            style="width:50px;font-size:1.2rem;padding:0;display:flex;align-items:center;justify-content:center;">👁</button>
                     </div>
                 </div>
-                
+
                 <div style="margin-top:24px; text-align:center;">
-                    <button class="btn btn-primary" style="width:100%; border-radius:100px; padding:12px;" onclick="saveAdminSettings()">設定を保存する</button>
+                    <button class="btn btn-primary" style="width:100%; border-radius:100px; padding:12px;"
+                        onclick="saveAdminSettings()">設定を保存する</button>
                 </div>
             </div>
 
             <div style="background:var(--surface); border-radius:16px; padding:32px; box-shadow:var(--shadow-lg);">
-                <h3 style="margin-bottom:20px; font-family:'Shippori Mincho', serif; border-bottom:1.5px solid var(--border); padding-bottom:12px;">👥 登録ユーザー管理</h3>
+                <h3
+                    style="margin-bottom:20px; font-family:'Shippori Mincho', serif; border-bottom:1.5px solid var(--border); padding-bottom:12px;">
+                    👥 登録ユーザー管理</h3>
                 <p style="font-size:0.85rem; color:var(--ink-muted); margin-bottom:16px;">現在登録されているすべてのユーザー一覧です。</p>
                 <div id="admin-users-list" style="display:flex; flex-direction:column; gap:12px;"></div>
             </div>
@@ -576,13 +600,13 @@
             const btn = document.getElementById('nav-login-btn');
             const regBtn = document.getElementById('nav-register-btn');
             const adminBtn = document.getElementById('nav-admin-btn');
-            
+
             if (isSuperAdmin || currentLoggedIn) {
                 document.body.classList.add('admin-mode');
                 btn.textContent = '🚪 ログアウト';
                 btn.style.background = 'var(--accent)';
                 if (regBtn) regBtn.style.display = 'none';
-                
+
                 if (isSuperAdmin) {
                     document.body.classList.add('super-admin-mode');
                     if (adminBtn) adminBtn.style.display = 'inline-block';
@@ -616,9 +640,9 @@
                 updateMenuButton();
             }
         }
-        function closeLoginModal() { 
-            document.getElementById('login-modal').classList.remove('open'); 
-            showPage('home'); 
+        function closeLoginModal() {
+            document.getElementById('login-modal').classList.remove('open');
+            showPage('home');
         }
 
         function doLogin() {
@@ -693,7 +717,7 @@
         function toggleNewsBody(id) {
             const el = document.getElementById('news-body-' + id);
             const btn = document.getElementById('news-toggle-' + id);
-            if(el.style.display === 'none') {
+            if (el.style.display === 'none') {
                 el.style.display = 'block';
                 btn.textContent = '▲ 閉じる';
             } else {
@@ -753,9 +777,9 @@
             document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
             document.querySelectorAll('nav button').forEach(b => b.classList.remove('active'));
             document.getElementById('page-' + id).classList.add('active');
-            
+
             const btn = document.querySelector(`nav button[data-page="${id}"]`);
-            if(btn) btn.classList.add('active');
+            if (btn) btn.classList.add('active');
 
             updateHomeCounts();
             if (id === 'memory') initMemory();
@@ -879,7 +903,7 @@
             document.getElementById('lightbox-comment-text').innerHTML = (p.comment || '').replace(/\n/g, '<br>');
             document.getElementById('lightbox').classList.add('open');
         }
-        function closeLightbox(e, force = false) { 
+        function closeLightbox(e, force = false) {
             if (force || e.target.id === 'lightbox') {
                 document.getElementById('lightbox').classList.remove('open');
             }
@@ -1655,7 +1679,7 @@
             document.getElementById('setting-id').value = pageUser || 'admin';
             document.getElementById('setting-name').value = ls('profile_name', 'SADA');
             document.getElementById('setting-bday').value = ls('profile_bday', '');
-            
+
             let currentPass = '';
             if (isSuperAdmin) {
                 currentPass = ls('admin_pass', '1234');
@@ -1733,9 +1757,9 @@
             if (name) ss('profile_name', name);
             if (bday) ss('profile_bday', bday);
             if (b64) ss('profile_img', b64);
-            
+
             let idChanged = false;
-            
+
             if (isSuperAdmin) {
                 if (pass) ss('admin_pass', pass);
                 if (newId && newId !== 'admin') {
@@ -1757,9 +1781,9 @@
                     users[newId] = pass || users[pageUser];
                     delete users[pageUser];
                     localStorage.setItem('registered_users', JSON.stringify(users));
-                    
+
                     let keysToMigrate = [];
-                    for(let i = 0; i < localStorage.length; i++) {
+                    for (let i = 0; i < localStorage.length; i++) {
                         let k = localStorage.key(i);
                         if (k.startsWith(pageUser + '_')) {
                             keysToMigrate.push(k);
@@ -1770,7 +1794,7 @@
                         localStorage.setItem(newId + '_' + k.substring(pageUser.length + 1), v);
                         localStorage.removeItem(k);
                     });
-                    
+
                     localStorage.setItem('logged_in_user', newId);
                     idChanged = true;
                 } else if (pass) {
@@ -1801,7 +1825,7 @@
             const pPass = localStorage.getItem('admin_pass') ? JSON.parse(localStorage.getItem('admin_pass')) : '1234';
             const pImg = localStorage.getItem('profile_img') ? JSON.parse(localStorage.getItem('profile_img')) : '';
             const pId = localStorage.getItem('admin_id') || 'admin';
-            
+
             document.getElementById('admin-name').value = pName;
             document.getElementById('admin-pass').value = pPass;
             document.getElementById('admin-id').value = pId;
@@ -1822,13 +1846,13 @@
             const name = document.getElementById('admin-name').value.trim();
             const pass = document.getElementById('admin-pass').value.trim();
             const b64 = document.getElementById('admin-img-data').value;
-            
+
             if (name) localStorage.setItem('profile_name', JSON.stringify(name));
             if (pass) localStorage.setItem('admin_pass', JSON.stringify(pass));
             if (b64) localStorage.setItem('profile_img', JSON.stringify(b64));
-            
+
             toast('👑 管理者設定を保存しました！');
-            loadProfileData(); 
+            loadProfileData();
             initAdminPage();
         }
 
@@ -1841,7 +1865,7 @@
                 listEl.innerHTML = '<div style="color:var(--ink-muted); font-size:0.85rem; text-align:center; padding:20px;">登録ユーザーはいません。</div>';
                 return;
             }
-            
+
             listEl.innerHTML = ids.map(id => {
                 const pName = JSON.parse(localStorage.getItem(id + '_profile_name')) || '未設定';
                 const photos = JSON.parse(localStorage.getItem(id + '_photos')) || [];
@@ -1864,18 +1888,18 @@
 
         function deleteUserAccount(id) {
             if (!confirm(`本当にユーザー「${id}」を削除しますか？\n関連データ（写真・日記など）もすべて削除されます。`)) return;
-            
+
             let users = JSON.parse(localStorage.getItem('registered_users')) || {};
             delete users[id];
             localStorage.setItem('registered_users', JSON.stringify(users));
-            
+
             let keysToDelete = [];
             for (let i = 0; i < localStorage.length; i++) {
                 let k = localStorage.key(i);
                 if (k.startsWith(id + '_')) keysToDelete.push(k);
             }
             keysToDelete.forEach(k => localStorage.removeItem(k));
-            
+
             toast(`🗑️ ユーザー「${id}」を削除しました。`);
             renderAdminUsersList();
         }
