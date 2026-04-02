@@ -530,9 +530,28 @@
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
+    <!-- Firebase SDK (v9 compat mode for ease of use) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
     <script>
         // ============================================================
-        // VERCEL API SETUP
+        // FIREBASE SETUP
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB9UuKCNXizMOL5DrRHb2XzDK2yaiT2l2Q",
+            authDomain: "my-portal-iri.firebaseapp.com",
+            databaseURL: "https://my-portal-iri-default-rtdb.firebaseio.com",
+            projectId: "my-portal-iri",
+            storageBucket: "my-portal-iri.firebasestorage.app",
+            messagingSenderId: "205249019511",
+            appId: "1:205249019511:web:b22f53d6a9eabfd5dd5072",
+            measurementId: "G-LRZCD9R4VF"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const storage = firebase.storage();
         // ============================================================
         // ROUTING & NAMESPACING
         // ============================================================
@@ -554,14 +573,14 @@
 
         async function initRemoteData() {
             try {
-                const gResp = await fetch('/api/data?action=get_all&group=global_data');
-                const gResult = await gResp.json();
-                remoteGlobal = gResult.data || {};
+                // Load global data from Firebase
+                const gSnap = await database.ref('global_data').get();
+                remoteGlobal = gSnap.val() || {};
 
+                // Load user data from Firebase if pageUser exists
                 if (pageUser) {
-                    const uResp = await fetch(`/api/data?action=get_all&group=user_data:${pageUser}`);
-                    const uResult = await uResp.json();
-                    remoteData = uResult.data || {};
+                    const uSnap = await database.ref('user_data/' + pageUser).get();
+                    remoteData = uSnap.val() || {};
                 }
 
                 syncDataToVars();
@@ -740,17 +759,24 @@
             if (!id || !pass) { alert('IDとパスワードを入力してください。'); return; }
 
             try {
-                const action = (id === 'admin') ? 'admin_login' : 'login';
-                const resp = await fetch('/api/auth', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action, id, pass })
-                });
+                // Special check for super-admin (id: admin)
+                if (id === 'admin') {
+                    const snap = await database.ref('global_data/admin_pass').get();
+                    const adminPass = snap.val() || '1234';
+                    if (pass === adminPass) {
+                        localStorage.setItem('admin_session', 'true');
+                        closeLoginModal();
+                        window.location.reload();
+                        return;
+                    }
+                }
 
-                if (resp.ok) {
-                    localStorage.setItem(id === 'admin' ? 'admin_session' : 'logged_in_user', id === 'admin' ? 'true' : id);
+                // Normal user check
+                const snap = await database.ref('users/' + id).get();
+                if (snap.exists() && snap.val() === pass) {
+                    localStorage.setItem('logged_in_user', id);
                     closeLoginModal();
-                    if (id !== 'admin' && pageUser !== id) {
+                    if (pageUser !== id) {
                         window.location.href = 'index.html?u=' + encodeURIComponent(id);
                     } else {
                         window.location.reload();
@@ -894,19 +920,16 @@
 
         async function ss(key, val) {
             const isGlobal = globalKeys.includes(key);
-            const group = isGlobal ? 'global_data' : `user_data:${pageUser}`;
+            const path = isGlobal ? `global_data/${key}` : `user_data/${pageUser}/${key}`;
             
+            // Update local cache first
             if (isGlobal) remoteGlobal[key] = val;
             else remoteData[key] = val;
 
             try {
-                await fetch('/api/data', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'set', group, key, val })
-                });
+                await database.ref(path).set(val);
             } catch (err) {
-                console.error('Save failed:', err);
+                console.error('Firebase save failed:', err);
                 toast('⚠️ 保存に失敗しました。');
             }
         }
@@ -984,16 +1007,14 @@
                     img.src = URL.createObjectURL(f);
                 });
 
+                // Convert dataUrl to Blob for upload
+                const blob = await (await fetch(dataUrl)).blob();
+                
                 try {
                     const fileName = Date.now() + '_' + f.name;
-                    const resp = await fetch('/api/blob', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ filename: `uploads/${uId}/${fileName}`, base64: dataUrl })
-                    });
-                    const resData = await resp.json();
-                    if (!resp.ok) throw new Error(resData.error);
-                    const downloadUrl = resData.url;
+                    const storageRef = storage.ref(`uploads/${uId}/${fileName}`);
+                    const snapshot = await storageRef.put(blob);
+                    const downloadUrl = await snapshot.ref.getDownloadURL();
                     
                     photos.push({ src: downloadUrl, name: f.name, date: Date.now() });
                     loadedCount++;
@@ -1815,13 +1836,11 @@
 
             let currentPass = '';
             if (isSuperAdmin) {
-                const resp = await fetch('/api/data?action=get&group=global_data&key=admin_pass');
-                const result = await resp.json();
-                currentPass = result.data || '1234';
+                const snap = await database.ref('global_data/admin_pass').get();
+                currentPass = snap.val() || '1234';
             } else if (pageUser) {
-                const resp = await fetch(`/api/data?action=get&group=users&key=${pageUser}`);
-                const result = await resp.json();
-                currentPass = result.data || '';
+                const snap = await database.ref('users/' + pageUser).get();
+                currentPass = snap.val() || '';
             }
             document.getElementById('setting-pass').value = currentPass;
 
@@ -1870,17 +1889,14 @@
                 img.src = URL.createObjectURL(file);
             });
 
-            // Upload profile image to Vercel Blob
+            // Upload profile image to Firebase Storage
+            const blob = await (await fetch(dataUrl)).blob();
             const uId = pageUser || 'admin';
+            
             try {
-                const resp = await fetch('/api/blob', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ filename: `uploads/${uId}/profile.jpg`, base64: dataUrl })
-                });
-                const resData = await resp.json();
-                if (!resp.ok) throw new Error(resData.error);
-                const downloadUrl = resData.url;
+                const storageRef = storage.ref(`uploads/${uId}/profile.jpg`);
+                const snapshot = await storageRef.put(blob);
+                const downloadUrl = await snapshot.ref.getDownloadURL();
                 
                 document.getElementById(previewId).innerHTML = `<img src="${downloadUrl}" style="width:100%;height:100%;object-fit:cover;">`;
                 document.getElementById(dataId).value = downloadUrl;
@@ -1913,11 +1929,7 @@
                 if (targetId === 'admin') {
                     await ss('admin_pass', pass);
                 } else if (targetId) {
-                    await fetch('/api/data', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ action: 'set', group: 'users', key: targetId, val: pass })
-                    });
+                    await database.ref('users/' + targetId).set(pass);
                 }
             }
             
@@ -1931,13 +1943,10 @@
         async function initAdminPage() {
             if (!isSuperAdmin) return;
             
-            // Fetch super-admin data
-            const snapResp = await fetch('/api/data?action=get_all&group=global_data');
-            const snapJson = await snapResp.json();
-            const data = snapJson.data || {};
-            const userSnapResp = await fetch('/api/data?action=get&group=users&key=admin');
-            const userSnapJson = await userSnapResp.json();
-            const userSnap = { exists: () => userSnapJson.data != null, val: () => userSnapJson.data };
+            // Fetch super-admin data from Firebase
+            const snap = await database.ref('global_data').get();
+            const data = snap.val() || {};
+            const userSnap = await database.ref('users/admin').get();
             
             const pId = data.admin_id || 'admin';
             const pName = data.profile_name || '運営管理者';
@@ -1978,9 +1987,8 @@
             const listEl = document.getElementById('admin-users-list');
             if (!listEl) return;
             
-            const snapResp = await fetch('/api/data?action=get_all&group=users');
-            const snapJson = await snapResp.json();
-            const users = snapJson.data || {};
+            const snap = await database.ref('users').get();
+            const users = snap.val() || {};
             const ids = Object.keys(users).filter(id => id !== 'admin');
             
             if (ids.length === 0) {
@@ -2005,11 +2013,8 @@
             if (!confirm(`本当にユーザー「${id}」を削除しますか？\n関連データ（写真・日記など）もすべて削除されます。`)) return;
 
             try {
-                await fetch('/api/data', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ action: 'del', group: 'users', key: id })
-                });
+                await database.ref('users/' + id).remove();
+                await database.ref('user_data/' + id).remove();
                 // Photos in storage are harder to batch delete without a cloud function, but the metadata is gone.
 
                 toast(`🗑️ ユーザー「${id}」を削除しました。`);
