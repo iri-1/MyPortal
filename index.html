@@ -530,7 +530,27 @@
     <!-- TOAST -->
     <div class="toast" id="toast"></div>
 
+    <!-- Firebase SDK (v9 compat mode for ease of use) -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-storage-compat.js"></script>
+
     <script>
+        // ============================================================
+        // FIREBASE SETUP
+        // ============================================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyB9UuKCNXizMOL5DrRHb2XzDK2yaiT2l2Q",
+            authDomain: "my-portal-iri.firebaseapp.com",
+            projectId: "my-portal-iri",
+            storageBucket: "my-portal-iri.firebasestorage.app",
+            messagingSenderId: "205249019511",
+            appId: "1:205249019511:web:b22f53d6a9eabfd5dd5072",
+            measurementId: "G-LRZCD9R4VF"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const storage = firebase.storage();
         // ============================================================
         // ROUTING & NAMESPACING
         // ============================================================
@@ -543,6 +563,93 @@
             }
         }
         const storagePrefix = pageUser ? pageUser + '_' : '';
+
+        // ============================================================
+        // SYNC DATA CACHE
+        // ============================================================
+        let remoteData = {};
+        let remoteGlobal = {};
+
+        async function initRemoteData() {
+            try {
+                // Load global data from Firebase
+                const gSnap = await database.ref('global_data').get();
+                remoteGlobal = gSnap.val() || {};
+
+                // Load user data from Firebase if pageUser exists
+                if (pageUser) {
+                    const uSnap = await database.ref('user_data/' + pageUser).get();
+                    remoteData = uSnap.val() || {};
+                }
+
+                syncDataToVars();
+                renderInitialUI();
+            } catch (err) {
+                console.error('Initial data load failed:', err);
+                toast('⚠️ データの読み込みに失敗しました。');
+            }
+        }
+
+        function syncDataToVars() {
+            // News
+            globalNewsItems = ls('news_list', [
+                { id: 3, date: '2026.03.27', text: 'ゲームにルーレットとおみくじが追加されました！', authorType: 'admin' },
+                { id: 2, date: '2026.03.27', text: 'フォトアルバムの画像追加の不具合（容量超過時のエラー表示）を修正しました。', authorType: 'admin' },
+                { id: 1, date: '2026.03.20', text: 'マイページを公開しました。', authorType: 'admin' }
+            ]);
+            personalNewsItems = ls('personal_news', []);
+            
+            // Features
+            photos = ls('photos', []);
+            events = ls('events', []);
+            memos = ls('memos', []);
+            bookmarks = ls('bookmarks', []);
+            diaries = ls('diaries', []);
+            roulettePresets = ls('roulette_presets', []);
+        }
+
+        function renderInitialUI() {
+            updateAdminUI();
+            initHome();
+            renderNews();
+            updateHomeCounts();
+            renderAlbum();
+            renderCal();
+            renderMemoList();
+            renderBookmarks();
+            renderDiaries();
+            renderRoulettePresets();
+            drawRoulette();
+            
+            // Games
+            initMine();
+            initMemory();
+            initWord();
+            
+            // Profile display
+            const pName = ls('profile_name', '');
+            if (pName) {
+                document.getElementById('home-profile-name').textContent = pName;
+                document.getElementById('home-name-wrap').style.display = 'inline';
+            } else {
+                document.getElementById('home-name-wrap').style.display = 'none';
+            }
+            
+            const pImg = ls('profile_img', '');
+            if (pImg) {
+                document.getElementById('home-profile-img').innerHTML = `<img src="${pImg}" style="width:100%;height:100%;object-fit:cover;">`;
+            }
+            
+            // Birthday
+            const bday = ls('profile_bday', '');
+            if (bday) {
+                const d = new Date();
+                const today = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                if (bday.endsWith(today)) {
+                    document.getElementById('home-birthday-msg').style.display = 'block';
+                }
+            }
+        }
 
         // ============================================================
         // AUTH & ADMIN
@@ -645,32 +752,40 @@
             showPage('home');
         }
 
-        function doLogin() {
+        async function doLogin() {
             const id = document.getElementById('login-id').value.trim();
             const pass = document.getElementById('login-pass').value;
             if (!id || !pass) { alert('IDとパスワードを入力してください。'); return; }
 
-            // Helper to get global (unprefixed) settings
-            const getGlobal = (k, d) => {
-                const v = localStorage.getItem(k);
-                try { return v ? JSON.parse(v) : d; } catch (e) { return v || d; }
-            };
+            try {
+                // Special check for super-admin (id: admin)
+                if (id === 'admin') {
+                    const snap = await database.ref('global_data/admin_pass').get();
+                    const adminPass = snap.val() || '1234';
+                    if (pass === adminPass) {
+                        localStorage.setItem('admin_session', 'true');
+                        closeLoginModal();
+                        window.location.reload();
+                        return;
+                    }
+                }
 
-            const correctAdminId = getGlobal('admin_id', 'admin');
-            const correctAdminPass = getGlobal('admin_pass', '1234');
-            let users = ls('registered_users', {});
-
-            if (id === correctAdminId && pass === correctAdminPass) {
-                localStorage.setItem('admin_session', 'true');
-                closeLoginModal();
-                window.location.reload();
-            } else if (users[id] && users[id] === pass) {
-                localStorage.setItem('logged_in_user', id);
-                closeLoginModal();
-                if (pageUser !== id) window.location.href = 'index.html?u=' + encodeURIComponent(id);
-                else window.location.reload();
-            } else {
-                alert('IDまたはパスワードが違います。');
+                // Normal user check
+                const snap = await database.ref('users/' + id).get();
+                if (snap.exists() && snap.val() === pass) {
+                    localStorage.setItem('logged_in_user', id);
+                    closeLoginModal();
+                    if (pageUser !== id) {
+                        window.location.href = 'index.html?u=' + encodeURIComponent(id);
+                    } else {
+                        window.location.reload();
+                    }
+                } else {
+                    alert('IDまたはパスワードが違います。');
+                }
+            } catch (err) {
+                console.error(err);
+                alert('通信エラーが発生しました。');
             }
         }
 
@@ -792,15 +907,30 @@
         });
 
         // ============================================================
-        // STORAGE HELPERS
+        // STORAGE HELPERS (FIREBASE SYNC)
         // ============================================================
+        const globalKeys = ['registered_users', 'admin_id', 'admin_pass', 'roulette_presets', 'news_list'];
+        
         function ls(key, def) {
-            const k = (key === 'registered_users' || key === 'admin_id' || key === 'admin_pass' || key === 'roulette_presets' || key === 'news_list') ? key : storagePrefix + key;
-            try { return JSON.parse(localStorage.getItem(k)) ?? def; } catch { return def; }
+            const isGlobal = globalKeys.includes(key);
+            const source = isGlobal ? remoteGlobal : remoteData;
+            return source[key] ?? def;
         }
-        function ss(key, val) {
-            const k = (key === 'registered_users' || key === 'admin_id' || key === 'admin_pass' || key === 'roulette_presets' || key === 'news_list') ? key : storagePrefix + key;
-            localStorage.setItem(k, JSON.stringify(val));
+
+        async function ss(key, val) {
+            const isGlobal = globalKeys.includes(key);
+            const path = isGlobal ? `global_data/${key}` : `user_data/${pageUser}/${key}`;
+            
+            // Update local cache first
+            if (isGlobal) remoteGlobal[key] = val;
+            else remoteData[key] = val;
+
+            try {
+                await database.ref(path).set(val);
+            } catch (err) {
+                console.error('Firebase save failed:', err);
+                toast('⚠️ 保存に失敗しました。');
+            }
         }
 
         // ============================================================
@@ -849,49 +979,72 @@
         ${p.comment ? `<div style="font-size:0.85rem; color:var(--ink); text-align:center; word-wrap:break-word; overflow-wrap:break-word; padding:0 4px;">${p.comment.replace(/\\n/g, '<br>')}</div>` : ''}
     </div>`).join('');
         }
-        function addPhotos(e) {
+        async function addPhotos(e) {
+            if (!isAdmin) return;
             const files = Array.from(e.target.files);
             if (!files.length) return;
-            let loaded = 0;
+            
+            let loadedCount = 0;
+            const uId = pageUser || 'admin';
 
-            const processDone = () => {
-                loaded++;
-                if (loaded === files.length) {
-                    try {
-                        ss('photos', photos);
-                        renderAlbum(); updateHomeCounts();
-                        toast(`📷 ${loaded}枚追加しました！`);
-                    } catch (err) {
-                        toast('⚠️ 容量オーバーです。古い写真を削除してから再度お試しください。');
-                    }
-                }
-            };
-
-            files.forEach(f => {
+            for (const f of files) {
                 const img = new Image();
-                img.onload = () => {
-                    const canvas = document.createElement('canvas');
-                    let w = img.width, h = img.height;
-                    const max = 800;
-                    if (w > max || h > max) {
-                        if (w > h) { h *= max / w; w = max; }
-                        else { w *= max / h; h = max; }
-                    }
-                    canvas.width = w; canvas.height = h;
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, w, h);
-                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
-                    photos.push({ src: dataUrl, name: f.name, date: Date.now() });
-                    processDone();
-                };
-                img.onerror = processDone;
-                img.src = URL.createObjectURL(f);
-            });
+                const dataUrl = await new Promise((resolve) => {
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let w = img.width, h = img.height;
+                        const max = 1200; 
+                        if (w > max || h > max) {
+                            if (w > h) { h *= max / w; w = max; }
+                            else { w *= max / h; h = max; }
+                        }
+                        canvas.width = w; canvas.height = h;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, w, h);
+                        resolve(canvas.toDataURL('image/jpeg', 0.85));
+                    };
+                    img.src = URL.createObjectURL(f);
+                });
+
+                // Convert dataUrl to Blob for upload
+                const blob = await (await fetch(dataUrl)).blob();
+                
+                try {
+                    const fileName = Date.now() + '_' + f.name;
+                    const storageRef = storage.ref(`uploads/${uId}/${fileName}`);
+                    const snapshot = await storageRef.put(blob);
+                    const downloadUrl = await snapshot.ref.getDownloadURL();
+                    
+                    photos.push({ src: downloadUrl, name: f.name, date: Date.now() });
+                    loadedCount++;
+                } catch (err) {
+                    console.error('Upload failed:', err);
+                }
+            }
+
+            await ss('photos', photos);
+            renderAlbum(); 
+            updateHomeCounts();
+            toast(`📷 ${loadedCount}枚追加しました！`);
             e.target.value = '';
         }
-        function deletePhoto(i) {
+
+        async function deletePhoto(i) {
+            if (!isAdmin) return;
             if (!confirm('この写真を削除しますか？')) return;
-            photos.splice(i, 1); ss('photos', photos); renderAlbum(); updateHomeCounts();
+            
+            const p = photos[i];
+            
+            try { 
+                await storage.refFromURL(p.src).delete();
+            } catch (e) {
+                console.warn('Physical file delete failed (maybe already gone?):', e);
+            }
+
+            photos.splice(i, 1); 
+            await ss('photos', photos); 
+            renderAlbum(); 
+            updateHomeCounts();
             toast('削除しました。');
         }
         let currentLightboxIndex = -1;
@@ -1675,26 +1828,25 @@
             }
         }
 
-        function initSettingsPage() {
+        async function initSettingsPage() {
             document.getElementById('setting-id').value = pageUser || 'admin';
             document.getElementById('setting-name').value = ls('profile_name', 'SADA');
             document.getElementById('setting-bday').value = ls('profile_bday', '');
 
             let currentPass = '';
             if (isSuperAdmin) {
-                currentPass = ls('admin_pass', '1234');
+                const snap = await database.ref('global_data/admin_pass').get();
+                currentPass = snap.val() || '1234';
             } else if (pageUser) {
-                let users = JSON.parse(localStorage.getItem('registered_users')) || {};
-                currentPass = users[pageUser] || '';
+                const snap = await database.ref('users/' + pageUser).get();
+                currentPass = snap.val() || '';
             }
             document.getElementById('setting-pass').value = currentPass;
 
             const pImg = ls('profile_img', '');
             document.getElementById('setting-img-data').value = pImg;
             document.getElementById('setting-img-preview').innerHTML = pImg ? `<img src="${pImg}" style="width:100%;height:100%;object-fit:cover;">` : '👤';
-
-            const passEl = document.getElementById('setting-pass');
-            passEl.type = 'password';
+            document.getElementById('setting-pass').type = 'password';
 
             if (!isAdmin) {
                 document.getElementById('setting-id').parentElement.style.display = 'none';
@@ -1714,16 +1866,16 @@
             }
         }
 
-        function handleProfileImage(input, previewId = 'setting-img-preview', dataId = 'setting-img-data') {
+        async function handleProfileImage(input, previewId = 'setting-img-preview', dataId = 'setting-img-data') {
             const file = input.files[0];
             if (!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                const img = new Image();
+
+            const img = new Image();
+            const dataUrl = await new Promise((resolve) => {
                 img.onload = () => {
                     const canvas = document.createElement('canvas');
                     let w = img.width, h = img.height;
-                    const max = 300;
+                    const max = 400;
                     if (w > max || h > max) {
                         if (w > h) { h *= max / w; w = max; }
                         else { w *= max / h; h = max; }
@@ -1731,100 +1883,74 @@
                     canvas.width = w; canvas.height = h;
                     const ctx = canvas.getContext('2d');
                     ctx.drawImage(img, 0, 0, w, h);
-                    const b64 = canvas.toDataURL('image/jpeg', 0.8);
-
-                    document.getElementById(previewId).innerHTML = `<img src="${b64}" style="width:100%;height:100%;object-fit:cover;">`;
-                    document.getElementById(dataId).value = b64;
+                    resolve(canvas.toDataURL('image/jpeg', 0.85));
                 };
-                img.src = e.target.result;
-            };
-            reader.readAsDataURL(file);
+                img.src = URL.createObjectURL(file);
+            });
+
+            // Upload profile image to Firebase Storage
+            const blob = await (await fetch(dataUrl)).blob();
+            const uId = pageUser || 'admin';
+            
+            try {
+                const storageRef = storage.ref(`uploads/${uId}/profile.jpg`);
+                const snapshot = await storageRef.put(blob);
+                const downloadUrl = await snapshot.ref.getDownloadURL();
+                
+                document.getElementById(previewId).innerHTML = `<img src="${downloadUrl}" style="width:100%;height:100%;object-fit:cover;">`;
+                document.getElementById(dataId).value = downloadUrl;
+            } catch (err) {
+                console.error('Profile image upload failed:', err);
+                toast('⚠️ アップロードに失敗しました。');
+            }
         }
 
-        function saveAllSettings() {
+        async function saveAllSettings() {
             if (!isAdmin) return;
             const newId = document.getElementById('setting-id').value.trim();
             const name = document.getElementById('setting-name').value.trim();
             const bday = document.getElementById('setting-bday').value;
             const pass = document.getElementById('setting-pass').value.trim();
-            const b64 = document.getElementById('setting-img-data').value;
+            const profileImgUrl = document.getElementById('setting-img-data').value;
 
             if (newId && !/^[a-zA-Z0-9_-]+$/.test(newId)) {
                 toast('URL(ID)は半角英数字とハイフン、アンダースコアのみです');
                 return;
             }
 
-            if (name) ss('profile_name', name);
-            if (bday) ss('profile_bday', bday);
-            if (b64) ss('profile_img', b64);
+            if (name) await ss('profile_name', name);
+            if (bday) await ss('profile_bday', bday);
+            if (profileImgUrl) await ss('profile_img', profileImgUrl);
 
-            let idChanged = false;
-
-            if (isSuperAdmin) {
-                if (pass) ss('admin_pass', pass);
-                if (newId && newId !== 'admin') {
-                    if (newId === 'register' || newId === 'index') {
-                        toast('そのIDは使用できません');
-                        return;
-                    }
-                    ss('admin_id', newId);
-                    localStorage.setItem('logged_in_user', newId);
-                    idChanged = true;
-                }
-            } else if (pageUser && currentLoggedIn === pageUser) {
-                let users = JSON.parse(localStorage.getItem('registered_users')) || {};
-                if (newId && newId !== pageUser) {
-                    if (users[newId] || newId === 'admin' || newId === 'register' || newId === 'index') {
-                        toast('そのIDはすでに使われているか、使用できません');
-                        return;
-                    }
-                    users[newId] = pass || users[pageUser];
-                    delete users[pageUser];
-                    localStorage.setItem('registered_users', JSON.stringify(users));
-
-                    let keysToMigrate = [];
-                    for (let i = 0; i < localStorage.length; i++) {
-                        let k = localStorage.key(i);
-                        if (k.startsWith(pageUser + '_')) {
-                            keysToMigrate.push(k);
-                        }
-                    }
-                    keysToMigrate.forEach(k => {
-                        let v = localStorage.getItem(k);
-                        localStorage.setItem(newId + '_' + k.substring(pageUser.length + 1), v);
-                        localStorage.removeItem(k);
-                    });
-
-                    localStorage.setItem('logged_in_user', newId);
-                    idChanged = true;
-                } else if (pass) {
-                    users[pageUser] = pass;
-                    localStorage.setItem('registered_users', JSON.stringify(users));
+            // Update password in global users list
+            if (pass) {
+                const targetId = isSuperAdmin ? 'admin' : (pageUser || '');
+                if (targetId === 'admin') {
+                    await ss('admin_pass', pass);
+                } else if (targetId) {
+                    await database.ref('users/' + targetId).set(pass);
                 }
             }
-
+            
             toast('⚙️ 設定を保存しました！');
-            loadProfileData();
-
-            if (idChanged) {
-                document.getElementById('setting-id').disabled = true;
-                document.getElementById('setting-name').disabled = true;
-                setTimeout(() => {
-                    const newUrl = isSuperAdmin ? 'index.html' : 'index.html?u=' + encodeURIComponent(newId);
-                    window.location.href = newUrl;
-                }, 1000);
-            }
+            renderInitialUI(); // Re-render everything
         }
 
         // ============================================================
         // ADMIN FUNCTIONS
         // ============================================================
-        function initAdminPage() {
+        async function initAdminPage() {
             if (!isSuperAdmin) return;
-            const pName = localStorage.getItem('profile_name') ? JSON.parse(localStorage.getItem('profile_name')) : '運営管理者';
-            const pPass = localStorage.getItem('admin_pass') ? JSON.parse(localStorage.getItem('admin_pass')) : '1234';
-            const pImg = localStorage.getItem('profile_img') ? JSON.parse(localStorage.getItem('profile_img')) : '';
-            const pId = localStorage.getItem('admin_id') || 'admin';
+            
+            // Fetch super-admin data from Firebase
+            const snap = await database.ref('global_data').get();
+            const data = snap.val() || {};
+            const userSnap = await database.ref('users/admin').get();
+            
+            const pId = data.admin_id || 'admin';
+            const pName = data.profile_name || '運営管理者';
+            const pPass = userSnap.val() || '1234';
+            const pImg = data.profile_img || '';
 
             document.getElementById('admin-name').value = pName;
             document.getElementById('admin-pass').value = pPass;
@@ -1841,91 +1967,67 @@
             el.type = el.type === 'password' ? 'text' : 'password';
         }
 
-        function saveAdminSettings() {
+        async function saveAdminSettings() {
             if (!isSuperAdmin) return;
             const name = document.getElementById('admin-name').value.trim();
             const pass = document.getElementById('admin-pass').value.trim();
-            const b64 = document.getElementById('admin-img-data').value;
+            const imgUrl = document.getElementById('admin-img-data').value;
 
-            if (name) localStorage.setItem('profile_name', JSON.stringify(name));
-            if (pass) localStorage.setItem('admin_pass', JSON.stringify(pass));
-            if (b64) localStorage.setItem('profile_img', JSON.stringify(b64));
+            if (name) await ss('profile_name', name);
+            if (pass) await ss('admin_pass', pass);
+            if (imgUrl) await ss('profile_img', imgUrl);
 
             toast('👑 管理者設定を保存しました！');
-            loadProfileData();
+            renderInitialUI();
             initAdminPage();
         }
 
-        function renderAdminUsersList() {
+        async function renderAdminUsersList() {
             const listEl = document.getElementById('admin-users-list');
             if (!listEl) return;
-            const users = JSON.parse(localStorage.getItem('registered_users')) || {};
-            const ids = Object.keys(users);
+            
+            const snap = await database.ref('users').get();
+            const users = snap.val() || {};
+            const ids = Object.keys(users).filter(id => id !== 'admin');
+            
             if (ids.length === 0) {
                 listEl.innerHTML = '<div style="color:var(--ink-muted); font-size:0.85rem; text-align:center; padding:20px;">登録ユーザーはいません。</div>';
                 return;
             }
 
-            listEl.innerHTML = ids.map(id => {
-                const pName = JSON.parse(localStorage.getItem(id + '_profile_name')) || '未設定';
-                const photos = JSON.parse(localStorage.getItem(id + '_photos')) || [];
-                return `
+            listEl.innerHTML = ids.map(id => `
                 <div style="display:flex; align-items:center; justify-content:space-between; padding:16px; border:1px solid var(--border); border-radius:10px; background:var(--bg);">
                     <div>
-                        <div style="font-weight:700; font-size:1.1rem; color:var(--ink);">${pName} <span style="font-size:0.8rem; color:var(--ink-muted); font-weight:normal; margin-left:4px;">(ID: ${id})</span></div>
-                        <div style="font-size:0.8rem; margin-top:6px; color:var(--ink-muted);">
-                            保存写真: ${photos.length}枚
-                        </div>
+                        <div style="font-weight:700; font-size:1.1rem; color:var(--ink);">ユーザー: ${id}</div>
                         <div style="font-size:0.8rem; margin-top:8px;">
                             <a href="index.html?u=${encodeURIComponent(id)}" target="_blank" style="color:var(--accent); text-decoration:none; font-weight:600;">🔗 ユーザーページを見る</a>
                         </div>
                     </div>
                     <button class="btn btn-danger" style="padding:8px 16px; font-size:0.8rem; border-radius:100px;" onclick="deleteUserAccount('${id}')">削除する</button>
                 </div>
-                `;
-            }).join('');
+            `).join('');
         }
 
-        function deleteUserAccount(id) {
+        async function deleteUserAccount(id) {
             if (!confirm(`本当にユーザー「${id}」を削除しますか？\n関連データ（写真・日記など）もすべて削除されます。`)) return;
 
-            let users = JSON.parse(localStorage.getItem('registered_users')) || {};
-            delete users[id];
-            localStorage.setItem('registered_users', JSON.stringify(users));
+            try {
+                await database.ref('users/' + id).remove();
+                await database.ref('user_data/' + id).remove();
+                // Photos in storage are harder to batch delete without a cloud function, but the metadata is gone.
 
-            let keysToDelete = [];
-            for (let i = 0; i < localStorage.length; i++) {
-                let k = localStorage.key(i);
-                if (k.startsWith(id + '_')) keysToDelete.push(k);
+                toast(`🗑️ ユーザー「${id}」を削除しました。`);
+                renderAdminUsersList();
+            } catch (err) {
+                console.error(err);
+                toast('⚠️ 削除に失敗しました。');
             }
-            keysToDelete.forEach(k => localStorage.removeItem(k));
-
-            toast(`🗑️ ユーザー「${id}」を削除しました。`);
-            renderAdminUsersList();
         }
 
         // ============================================================
         // INIT
         // ============================================================
-        loadProfileData();
-        updateAdminUI();
-        initHome();
-        renderNews();
-        renderAlbum();
-        renderCal();
-        renderMemoList();
-        renderBookmarks();
-        renderDiaries();
-        initMine();
-        initMemory();
-        initWord();
-
-        const savedRl = ls('roulette_items', null);
-        if (savedRl !== null) document.getElementById('roulette-items').value = savedRl;
-        drawRoulette();
-        renderRoulettePresets();
-
-        updateHomeCounts();
+        initRemoteData(); // This handles all initialization
     </script>
 
     <!-- NEWS MODAL -->
