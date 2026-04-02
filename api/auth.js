@@ -1,4 +1,9 @@
-const { kv } = require('@vercel/kv');
+const { createClient } = require('@vercel/kv');
+
+const kv = createClient({
+  url: process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL || '',
+  token: process.env.KV_REST_API_TOKEN || process.env.UPSTASH_REDIS_REST_TOKEN || ''
+});
 
 module.exports = async function handler(req, res) {
   const { action, id, pass, name, bday } = req.body || req.query;
