@@ -589,45 +589,54 @@
         }
 
         function renderInitialUI() {
-            updateAdminUI();
-            initHome();
-            renderNews();
-            updateHomeCounts();
-            renderAlbum();
-            renderCal();
-            renderMemoList();
-            renderBookmarks();
-            renderDiaries();
-            renderRoulettePresets();
-            drawRoulette();
+            try { updateAdminUI(); } catch (e) { console.error("Admin UI init failed", e); }
+            try { initHome(); } catch (e) { console.error("Home init failed", e); }
+            try { renderNews(); } catch (e) { console.error("News render failed", e); }
+            try { updateHomeCounts(); } catch (e) { console.error("Home counts failed", e); }
+            try { renderAlbum(); } catch (e) { console.error("Album render failed", e); }
+            try { renderCal(); } catch (e) { console.error("Calendar render failed", e); }
+            try { renderMemoList(); } catch (e) { console.error("Memo list failed", e); }
+            try { renderBookmarks(); } catch (e) { console.error("Bookmarks render failed", e); }
+            try { renderDiaries(); } catch (e) { console.error("Diaries render failed", e); }
+            try { renderRoulettePresets(); } catch (e) { console.error("Roulette render failed", e); }
+            try { drawRoulette(); } catch (e) { console.error("Roulette draw failed", e); }
             
             // Games
-            initMine();
-            initMemory();
-            initWord();
+            try { initMine(); } catch (e) { console.error("Minesweeper init failed", e); }
+            try { initMemory(); } catch (e) { console.error("Memory game init failed", e); }
+            try { initWord(); } catch (e) { console.error("Word game init failed", e); }
             
             // Profile display
-            const pName = ls('profile_name', '');
-            if (pName) {
-                document.getElementById('home-profile-name').textContent = pName;
-                document.getElementById('home-name-wrap').style.display = 'inline';
-            } else {
-                document.getElementById('home-name-wrap').style.display = 'none';
-            }
-            
-            const pImg = ls('profile_img', '');
-            if (pImg) {
-                document.getElementById('home-profile-img').innerHTML = `<img src="${pImg}" style="width:100%;height:100%;object-fit:cover;">`;
-            }
-            
-            // Birthday
-            const bday = ls('profile_bday', '');
-            if (bday) {
-                const d = new Date();
-                const today = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-                if (bday.endsWith(today)) {
-                    document.getElementById('home-birthday-msg').style.display = 'block';
+            try {
+                const pName = ls('profile_name', '');
+                if (pName) {
+                    const nameEl = document.getElementById('home-profile-name');
+                    if (nameEl) nameEl.textContent = pName;
+                    const wrapEl = document.getElementById('home-name-wrap');
+                    if (wrapEl) wrapEl.style.display = 'inline';
+                } else {
+                    const wrapEl = document.getElementById('home-name-wrap');
+                    if (wrapEl) wrapEl.style.display = 'none';
                 }
+                
+                const pImg = ls('profile_img', '');
+                const imgEl = document.getElementById('home-profile-img');
+                if (pImg && imgEl) {
+                    imgEl.innerHTML = `<img src="${pImg}" style="width:100%;height:100%;object-fit:cover;">`;
+                }
+                
+                // Birthday
+                const bday = ls('profile_bday', '');
+                if (bday) {
+                    const d = new Date();
+                    const today = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+                    const msgEl = document.getElementById('home-birthday-msg');
+                    if (bday.endsWith(today) && msgEl) {
+                        msgEl.style.display = 'block';
+                    }
+                }
+            } catch (e) {
+                console.error("Profile/Bday display failed", e);
             }
         }
 
@@ -2082,6 +2091,7 @@
             </div>
         </div>
     </div>
+    <div id="toast"></div>
 </body>
 
 </html>
