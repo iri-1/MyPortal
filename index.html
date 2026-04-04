@@ -21,31 +21,29 @@
 
 <body>
 
-    <!-- MENU TRIGGER -->
-    <div id="menu-circle-trigger" onclick="toggleMenu()">メニュー</div>
-
     <!-- HEADER -->
-    <header>
-        <div class="logo">My<span>Portal</span></div>
-        <nav>
-            <button id="nav-pin-btn" onclick="toggleNavFixed()"
-                style="margin-bottom:12px; background:var(--bg); border:1.5px dashed var(--border); font-size:0.8rem; justify-content:center; opacity:0.7;">📌
-                固定する</button>
-            <button class="active" data-page="home">🏠 ホーム</button>
-            <button data-page="album">📷 アルバム</button>
-            <button data-page="calendar">📅 カレンダー</button>
-            <button data-page="memo">📝 メモ</button>
-            <button data-page="bookmarks">🔖 ブックマーク</button>
-            <button data-page="diary">📔 日記</button>
-            <button data-page="game">🎮 ゲーム</button>
-            <button id="nav-settings-btn" class="admin-only" data-page="settings">⚙️
-                設定</button>
-            <button id="nav-admin-btn" class="super-admin-only" data-page="admin" style="color:var(--accent);">👑
-                管理</button>
-            <button id="nav-login-btn" onclick="toggleLoginState()" class="btn-primary">🔑 ログイン</button>
-            <a href="register.html" id="nav-register-btn" class="btn btn-primary" style="text-decoration:none;">✨
-                新規登録</a>
-        </nav>
+    <header id="main-header">
+        <div class="header-inner">
+            <div class="logo" onclick="showPage('home')" style="cursor:pointer;">My<span>Portal</span></div>
+            <button class="hamburger-btn" id="hamburger-btn" aria-label="メニュー" onclick="toggleMenu()">
+                <span></span><span></span><span></span>
+            </button>
+            <nav id="main-nav">
+                <button class="active nav-link" data-page="home"><span>🏠</span> ホーム</button>
+                <button class="nav-link" data-page="album"><span>📷</span> アルバム</button>
+                <button class="nav-link" data-page="calendar"><span>📅</span> カレ<br class="sp-only">ンダー</button>
+                <button class="nav-link" data-page="memo"><span>📝</span> メモ</button>
+                <button class="nav-link" data-page="bookmarks"><span>🔖</span> ブック<br class="sp-only">マーク</button>
+                <button class="nav-link" data-page="diary"><span>📔</span> 日記</button>
+                <button class="nav-link" data-page="game"><span>🎮</span> ゲーム</button>
+                <button id="nav-settings-btn" class="admin-only nav-link" data-page="settings"><span>⚙️</span> 設定</button>
+                <button id="nav-admin-btn" class="super-admin-only nav-link" data-page="admin" style="color:var(--accent);"><span>👑</span> 管理</button>
+                <div class="nav-auth-buttons">
+                    <button id="nav-login-btn" onclick="toggleLoginState()" class="btn-primary">🔑 ログイン</button>
+                    <a href="register.html" id="nav-register-btn" class="btn btn-primary" style="text-decoration:none;">✨ 新規登録</a>
+                </div>
+            </nav>
+        </div>
     </header>
 
     <!-- HOME -->
@@ -220,8 +218,8 @@
         <div style="max-width:1100px;margin:0 auto;padding:0 40px">
             <div class="memo-layout">
                 <div>
-                    <button class="btn btn-primary admin-only" style="width:100%; margin-bottom:12px;"
-                        onclick="newMemo()">保存</button>
+                    <button class="btn btn-primary admin-only" style="width:100%; margin-bottom:12px; font-weight:600;"
+                        onclick="newMemo()">＋ 新規メモを作成</button>
                     <div id="memo-list"></div>
                 </div>
                 <div class="memo-editor">
@@ -246,12 +244,12 @@
         </div>
         <div style="max-width:1100px;margin:0 auto;padding:0 40px">
             <div class="bm-add-form admin-only">
-                <div class="field"><label>サイト名</label><input type="text" id="bm-name" placeholder="サイト名"></div>
+                <h3 style="margin-bottom:16px; font-size:1.1rem; color:var(--ink);">🔖 ブックマークを追加</h3>
+                <div class="field"><label>サイト名</label><input type="text" id="bm-name" placeholder="例: Google"></div>
                 <div class="field"><label>URL</label><input type="url" id="bm-url" placeholder="https://..."></div>
-                <div class="field"><label>説明</label><input type="text" id="bm-desc" placeholder="簡単な説明（任意）"></div>
-                <div class="field"><label>タグ</label><input type="text" id="bm-tag" placeholder="カテゴリなど（任意）"></div>
-                <button class="btn btn-primary" style="align-self:flex-end;margin-bottom:0"
-                    onclick="addBookmark()">追加</button>
+                <div class="field"><label>説明 (任意)</label><input type="text" id="bm-desc" placeholder="検索エンジン"></div>
+                <div class="field"><label>タグ (任意)</label><input type="text" id="bm-tag" placeholder="IT"></div>
+                <button class="btn btn-primary" style="align-self:flex-end;margin-bottom:0;margin-top:8px" onclick="addBookmark()">＋ 追加する</button>
             </div>
             <div class="bm-grid" id="bm-grid"></div>
         </div>
