@@ -748,19 +748,27 @@
                 });
 
                 if (resp.ok) {
-                    localStorage.setItem(id === 'admin' ? 'admin_session' : 'logged_in_user', id === 'admin' ? 'true' : id);
-                    closeLoginModal();
-                    if (id !== 'admin' && pageUser !== id) {
-                        window.location.href = 'index.html?u=' + encodeURIComponent(id);
-                    } else {
+                    try {
+                        localStorage.setItem(id === 'admin' ? 'admin_session' : 'logged_in_user', id === 'admin' ? 'true' : id);
+                        closeLoginModal();
+                        if (id !== 'admin' && pageUser !== id) {
+                            window.location.href = 'index.html?u=' + encodeURIComponent(id);
+                        } else {
+                            window.location.reload();
+                        }
+                    } catch (e) {
+                        console.error("Post-login error:", e);
                         window.location.reload();
                     }
+                } else if (resp.status === 500) {
+                    const data = await resp.json().catch(()=>({}));
+                    alert('サーバー処理エラーが発生しました: ' + (data.error || resp.statusText));
                 } else {
                     alert('IDまたはパスワードが違います。');
                 }
             } catch (err) {
                 console.error(err);
-                alert('通信エラーが発生しました。');
+                alert('通信エラー（ネットワーク切断等）が発生しました。詳細: ' + err.message);
             }
         }
 
