@@ -27,16 +27,16 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ success: true });
       
     } else if (action === 'login') {
-      const actualPass = await kv.hget('users', id);
-      if (actualPass !== null && actualPass === pass) {
+      let actualPass = await kv.hget('users', id);
+      if (actualPass !== null && String(actualPass) === String(pass)) {
         return res.status(200).json({ success: true });
       }
       return res.status(401).json({ error: 'Unauthorized' });
       
     } else if (action === 'admin_login') {
-      const adminPass = await kv.hget('global_data', 'admin_pass');
-      const passToCheck = adminPass || '1234';
-      if (pass === passToCheck) {
+      let adminPass = await kv.hget('global_data', 'admin_pass');
+      let passToCheck = adminPass !== null && adminPass !== undefined ? String(adminPass) : '1234';
+      if (String(pass) === passToCheck) {
         return res.status(200).json({ success: true });
       }
       return res.status(401).json({ error: 'Unauthorized' });

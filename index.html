@@ -871,6 +871,9 @@
             const btn = document.querySelector(`nav button[data-page="${id}"]`);
             if (btn) btn.classList.add('active');
 
+            document.body.classList.remove('nav-open');
+            updateMenuButton();
+
             updateHomeCounts();
             if (id === 'memory') initMemory();
             if (id === 'word') initWord();
@@ -878,7 +881,9 @@
             if (id === 'admin') initAdminPage();
         }
         document.querySelectorAll('nav button').forEach(btn => {
-            btn.addEventListener('click', () => showPage(btn.dataset.page));
+            if (btn.dataset.page) {
+                btn.addEventListener('click', () => showPage(btn.dataset.page));
+            }
         });
 
         // ============================================================
