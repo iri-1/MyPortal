@@ -543,6 +543,19 @@
             }
         }
         const storagePrefix = pageUser ? pageUser + '_' : '';
+        
+        // ============================================================
+        // SECURITY HELPERS
+        // ============================================================
+        function escapeHTML(str) {
+            if (!str) return '';
+            const div = document.createElement('div');
+            div.textContent = str;
+            return div.innerHTML;
+        }
+        function nl2br(str) {
+            return escapeHTML(str).replace(/\n/g, '<br>');
+        }
 
         // ============================================================
         // SYNC DATA CACHE
@@ -553,17 +566,19 @@
         async function initRemoteData() {
             try {
                 const gResp = await fetch('/api/data?action=get_all&group=global_data');
+                if (!gResp.ok) throw new Error(`Global data load failed: ${gResp.status}`);
                 const gResult = await gResp.json();
                 remoteGlobal = gResult.data || {};
 
                 if (pageUser) {
                     const uResp = await fetch(`/api/data?action=get_all&group=user_data:${pageUser}`);
+                    if (!uResp.ok) throw new Error(`User data load failed: ${uResp.status}`);
                     const uResult = await uResp.json();
                     remoteData = uResult.data || {};
                 }
             } catch (err) {
                 console.error('Initial data load failed:', err);
-                toast('⚠️ データの読み込みに失敗しました。');
+                toast('⚠️ データの読み込みに失敗しました。詳細：' + err.message);
             } finally {
                 syncDataToVars();
                 renderInitialUI();
@@ -774,11 +789,15 @@
                         console.error("Post-login error:", e);
                         window.location.reload();
                     }
-                } else if (resp.status === 500) {
-                    const data = await resp.json().catch(()=>({}));
-                    alert('サーバー処理エラーが発生しました: ' + (data.error || resp.statusText));
                 } else {
-                    alert('IDまたはパスワードが違います。');
+                    const data = await resp.json().catch(() => ({}));
+                    if (resp.status === 401) {
+                        alert('IDまたはパスワードが違います。');
+                    } else if (resp.status === 500) {
+                        alert('サーバー処理エラーが発生しました: ' + (data.error || resp.statusText));
+                    } else {
+                        alert('ログインに失敗しました: ' + (data.error || resp.statusText));
+                    }
                 }
             } catch (err) {
                 console.error(err);
@@ -806,8 +825,8 @@
                 const delBtn = canDelete ? `<button class="admin-only" style="background:none;border:none;cursor:pointer;color:var(--ink-muted);font-size:1.3rem;line-height:1;margin-left:12px;" onclick="deleteNews(${n.id}, ${isGlobal})">×</button>` : '';
                 const tag = isGlobal ? `<span style="font-size:0.7rem; background:var(--accent); color:#fff; padding:2px 6px; border-radius:4px; margin-right:8px; white-space:nowrap;">運営</span>` : `<span style="font-size:0.7rem; background:#8aaecc; color:#fff; padding:2px 6px; border-radius:4px; margin-right:8px; white-space:nowrap;">個人</span>`;
 
-                const titleStr = n.title || n.text || '(無題)';
-                const bodyStr = n.body ? `<div id="news-body-${n.id}" style="display:none; font-size:0.9rem; color:var(--ink-muted); line-height:1.6; margin-top:12px; word-wrap:break-word; overflow-wrap:break-word; width:100%;">${n.body.replace(/\n/g, '<br>')}</div>
+                const titleStr = escapeHTML(n.title || n.text || '(無題)');
+                const bodyStr = n.body ? `<div id="news-body-${n.id}" style="display:none; font-size:0.9rem; color:var(--ink-muted); line-height:1.6; margin-top:12px; word-wrap:break-word; overflow-wrap:break-word; width:100%;">${nl2br(n.body)}</div>
                 <button onclick="toggleNewsBody(${n.id})" id="news-toggle-${n.id}" style="background:none; border:none; color:var(--accent); font-size:0.8rem; cursor:pointer; margin-top:8px;">▼ 本文を表示</button>` : '';
 
                 return `
@@ -815,7 +834,7 @@
                     <div style="display:flex; justify-content:space-between; width:100%; align-items:flex-start; flex-wrap:wrap; gap:8px;">
                         <div style="display:flex; align-items:center;">
                             ${tag}
-                            <span class="n-date" style="margin-right:0;font-weight:600;">${n.date}</span>
+                            <span class="n-date" style="margin-right:0;font-weight:600;">${escapeHTML(n.date)}</span>
                         </div>
                         ${delBtn}
                     </div>
@@ -936,14 +955,18 @@
             else remoteData[key] = val;
 
             try {
-                await fetch('/api/data', {
+                const resp = await fetch('/api/data', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ action: 'set', group, key, val })
                 });
+                if (!resp.ok) {
+                    const errData = await resp.json().catch(() => ({}));
+                    throw new Error(errData.error || `Save failed: ${resp.status}`);
+                }
             } catch (err) {
                 console.error('Save failed:', err);
-                toast('⚠️ 保存に失敗しました。');
+                toast('⚠️ 保存に失敗しました：' + err.message);
             }
         }
 
@@ -986,11 +1009,11 @@
             g.innerHTML = photos.map((p, i) => `
     <div style="display:flex; flex-direction:column; gap:8px;">
         <div class="album-item" onclick="openLightbox(${i})" style="margin-bottom:0;">
-            <img src="${p.src}" alt="${p.name}" loading="lazy">
-            <div class="overlay"><span class="caption">${p.name}</span></div>
+            <img src="${p.src}" alt="${escapeHTML(p.name)}" loading="lazy">
+            <div class="overlay"><span class="caption">${escapeHTML(p.name)}</span></div>
             <button class="del-btn admin-only" onclick="event.stopPropagation();deletePhoto(${i})">✕</button>
         </div>
-        ${p.comment ? `<div style="font-size:0.85rem; color:var(--ink); text-align:center; word-wrap:break-word; overflow-wrap:break-word; padding:0 4px;">${p.comment.replace(/\\n/g, '<br>')}</div>` : ''}
+        ${p.comment ? `<div style="font-size:0.85rem; color:var(--ink); text-align:center; word-wrap:break-word; overflow-wrap:break-word; padding:0 4px;">${nl2br(p.comment)}</div>` : ''}
     </div>`).join('');
         }
         async function addPhotos(e) {
@@ -1027,14 +1050,15 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ filename: `uploads/${uId}/${fileName}`, base64: dataUrl })
                     });
-                    const resData = await resp.json();
-                    if (!resp.ok) throw new Error(resData.error);
+                    const resData = await resp.json().catch(() => ({}));
+                    if (!resp.ok) throw new Error(resData.error || `Upload status: ${resp.status}`);
                     const downloadUrl = resData.url;
                     
                     photos.push({ src: downloadUrl, name: f.name, date: Date.now() });
                     loadedCount++;
                 } catch (err) {
                     console.error('Upload failed:', err);
+                    toast(`⚠️ ${f.name} のアップロードに失敗: ${err.message}`);
                 }
             }
 
@@ -1116,8 +1140,9 @@
                 const cls = [isToday ? 'today' : '', dow === 0 ? 'sun' : dow === 6 ? 'sat' : ''].filter(Boolean).join(' ');
                 const dayEvents = events.filter(e => e.date === dStr);
                 const dots = dayEvents.map(e => {
-                    const timeStr = e.time ? `${e.time} ` : '';
-                    return `<div class="event-dot" style="background:${e.color || 'var(--accent2)'}" title="${timeStr}${e.title}">${timeStr}${e.title}</div>`;
+                    const timeStr = e.time ? `${escapeHTML(e.time)} ` : '';
+                    const titleStr = escapeHTML(e.title);
+                    return `<div class="event-dot" style="background:${e.color || 'var(--accent2)'}" title="${timeStr}${titleStr}">${timeStr}${titleStr}</div>`;
                 }).join('');
                 html += `<div class="cal-day ${cls}" onclick="openEventModal('${dStr}')">
       <div class="day-num">${d}</div>${dots}</div>`;
@@ -1165,8 +1190,8 @@
     <div class="event-item">
       <div class="ei-dot" style="background:${e.color || 'var(--accent2)'}"></div>
       <div class="ei-info">
-        <div class="ei-date">${e.date}${e.time ? ' ' + e.time : ''}</div>
-        <div class="ei-title">${e.title}${e.memo ? ' — ' + e.memo : ''}</div>
+        <div class="ei-date">${escapeHTML(e.date)}${e.time ? ' ' + escapeHTML(e.time) : ''}</div>
+        <div class="ei-title">${escapeHTML(e.title)}${e.memo ? ' — ' + escapeHTML(e.memo) : ''}</div>
       </div>
       <button class="admin-only" onclick="deleteEvent(${e.id})" title="削除">🗑</button>
     </div>`).join('');
@@ -1184,7 +1209,7 @@
             if (!memos.length) { el.innerHTML = '<p style="font-size:.82rem;color:var(--ink-muted)">メモがありません。</p>'; return; }
             el.innerHTML = memos.map(m => `
     <div class="memo-list-item ${m.id === currentMemoId ? 'selected' : ''}" onclick="selectMemo(${m.id})">
-      <div class="mt">${m.title || '（無題）'}</div>
+      <div class="mt">${escapeHTML(m.title || '（無題）')}</div>
       <div class="md">${new Date(m.updated).toLocaleDateString('ja-JP')}</div>
     </div>`).join('');
         }
@@ -1245,10 +1270,10 @@
                 const favicon = domain ? `<img src="https://www.google.com/s2/favicons?domain=${domain}&sz=32" alt="">` : '🌐';
                 return `<div class="bm-card">
       <div class="bm-favicon">${favicon}</div>
-      <h4>${b.name}</h4>
-      <a href="${b.url}" target="_blank" rel="noopener">${b.url}</a>
-      ${b.desc ? `<div class="bm-desc">${b.desc}</div>` : ''}
-      ${b.tag ? `<span class="bm-tag">${b.tag}</span>` : ''}
+      <h4>${escapeHTML(b.name)}</h4>
+      <a href="${escapeHTML(b.url)}" target="_blank" rel="noopener">${escapeHTML(b.url)}</a>
+      ${b.desc ? `<div class="bm-desc">${escapeHTML(b.desc)}</div>` : ''}
+      ${b.tag ? `<span class="bm-tag">${escapeHTML(b.tag)}</span>` : ''}
       <button class="bm-del admin-only" onclick="deleteBookmark(${i})" title="削除">✕</button>
     </div>`;
             }).join('');
@@ -1328,10 +1353,10 @@
             }
             el.innerHTML = diaries.map(d => `
     <div class="diary-entry">
-      <div class="de-date">${d.date}</div>
-      <div class="de-mood">${d.mood}</div>
-      <h3>${d.title}</h3>
-      <p>${d.body}</p>
+      <div class="de-date">${escapeHTML(d.date)}</div>
+      <div class="de-mood">${escapeHTML(d.mood)}</div>
+      <h3>${escapeHTML(d.title)}</h3>
+      <p>${nl2br(d.body)}</p>
       <div class="de-actions admin-only">
         <button class="btn btn-danger" onclick="deleteDiaryEntry(${d.id})">削除</button>
       </div>
