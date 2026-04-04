@@ -644,7 +644,9 @@
             isAdmin = true;
         }
 
-        if (!pageUser && !isSuperAdmin) {
+        if (!pageUser && currentLoggedIn && currentLoggedIn !== 'true') {
+            window.location.replace('index.html?u=' + encodeURIComponent(currentLoggedIn));
+        } else if (!pageUser && !isSuperAdmin) {
             document.body.classList.add('guest-mode');
         }
 
@@ -902,7 +904,16 @@
         function ls(key, def) {
             const isGlobal = globalKeys.includes(key);
             const source = isGlobal ? remoteGlobal : remoteData;
-            return source[key] ?? def;
+            let val = source[key];
+            if (val === undefined || val === null) return def;
+            try {
+                if (typeof val === 'string' && (val.startsWith('[') || val.startsWith('{'))) {
+                    val = JSON.parse(val);
+                }
+            } catch (e) {
+                console.error('Failed to parse', key, val);
+            }
+            return (val !== undefined && val !== null) ? val : def;
         }
 
         async function ss(key, val) {
