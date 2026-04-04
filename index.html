@@ -561,12 +561,12 @@
                     const uResult = await uResp.json();
                     remoteData = uResult.data || {};
                 }
-
-                syncDataToVars();
-                renderInitialUI();
             } catch (err) {
                 console.error('Initial data load failed:', err);
                 toast('⚠️ データの読み込みに失敗しました。');
+            } finally {
+                syncDataToVars();
+                renderInitialUI();
             }
         }
 
@@ -690,25 +690,30 @@
             const regBtn = document.getElementById('nav-register-btn');
             const adminBtn = document.getElementById('nav-admin-btn');
 
+            // ログイン/ログアウトボタン等の共通表示
             if (isSuperAdmin || currentLoggedIn) {
-                document.body.classList.add('admin-mode');
                 btn.textContent = '🚪 ログアウト';
                 btn.style.background = 'var(--accent)';
                 if (regBtn) regBtn.style.display = 'none';
-
-                if (isSuperAdmin) {
-                    document.body.classList.add('super-admin-mode');
-                    if (adminBtn) adminBtn.style.display = 'inline-block';
-                } else {
-                    document.body.classList.remove('super-admin-mode');
-                    if (adminBtn) adminBtn.style.display = 'none';
-                }
             } else {
-                document.body.classList.remove('admin-mode');
-                document.body.classList.remove('super-admin-mode');
                 btn.textContent = '🔑 ログイン';
                 btn.style.background = 'var(--ink)';
                 if (regBtn) regBtn.style.display = 'inline-flex';
+            }
+
+            // マイページの本人 or 運営管理者の場合の編集権限
+            if (isAdmin) {
+                document.body.classList.add('admin-mode');
+            } else {
+                document.body.classList.remove('admin-mode');
+            }
+
+            // 運営管理者用の特別メニュー
+            if (isSuperAdmin) {
+                document.body.classList.add('super-admin-mode');
+                if (adminBtn) adminBtn.style.display = 'inline-block';
+            } else {
+                document.body.classList.remove('super-admin-mode');
                 if (adminBtn) adminBtn.style.display = 'none';
             }
         }
